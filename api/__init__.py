@@ -9,11 +9,11 @@ def create_api():
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_NAME}"
     db.init_app(app)
     
-    from api.routes.auth_route import auth
-    from api.routes.blog_route import blog_blueprint
-    from api.routes.habit_route import habit_blueprint
+    from api.user.auth_route import auth_blueprint
+    from api.blog.blog_post_route import blog_blueprint
+    from api.habit.habit_route import habit_blueprint
     from api.to_do.to_do_route import to_do_blueprint
-    app.register_blueprint(auth)
+    app.register_blueprint(auth_blueprint)
     app.register_blueprint(blog_blueprint)
     app.register_blueprint(habit_blueprint)
     app.register_blueprint(to_do_blueprint)
