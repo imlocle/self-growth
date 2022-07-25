@@ -130,3 +130,4 @@ dmypy.json
 
 *notes.txt
 *DS_Store
+*.db
