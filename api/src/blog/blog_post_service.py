@@ -1,6 +1,6 @@
-from api.blog.blog_post import BlogPost
-from api import db
-from api.user.user import User
+from src.blog.blog_post import BlogPost
+from src import db
+from src.user.user import User
 
 class BlogPostService:
     def __init__(self) -> None:

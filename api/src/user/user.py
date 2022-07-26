@@ -1,4 +1,4 @@
-from api.repository.db_repo import db
+from src.repository.db_repo import db
 from sqlalchemy.sql import func
 
 

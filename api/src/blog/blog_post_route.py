@@ -1,7 +1,7 @@
-from api.repository.db_repo import db
-from api.blog.blog_post import BlogPost
-from api.blog.blog_post_service import BlogPostService
-from api.utils.constants import GET, POST
+from src.repository.db_repo import db
+from src.blog.blog_post import BlogPost
+from src.blog.blog_post_service import BlogPostService
+from src.utils.constants import GET, POST
 from flask import Blueprint, jsonify, request
 
 blog_blueprint = Blueprint("blog", __name__)

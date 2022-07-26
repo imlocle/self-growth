@@ -1,6 +1,6 @@
-from api.habit.habit import Habit
-from api.repository.db_repo import db
-from api.utils.constants import POST
+from src.habit.habit import Habit
+from src.repository.db_repo import db
+from src.utils.constants import POST
 from flask import Blueprint, jsonify, request
 
 habit_blueprint = Blueprint("habit", __name__)

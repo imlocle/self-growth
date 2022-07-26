@@ -1,12 +1,12 @@
-from api.repository.db_repo import db
+from src.repository.db_repo import db
 from sqlalchemy.sql import func
 
-class ProCon(db.Model):
-    __tablename__ = "pro_con"
+class ToDo(db.Model):
+    __tablename__ = "to_do"
     id = db.Column(db.Integer, primary_key=True)
-    topic = db.Column(db.String(200), nullable=False)
-    pros = db.Column(db.Text, nullable=False)
-    cons = db.Column(db.Text, nullable=False)
+    todo = db.Column(db.String(200), nullable=False)
+    isCompleted = db.Column(db.Boolean, default=False)
+    date_due = db.Column(db.DateTime(timezone=True))
     date_modified = db.Column(db.DateTime(timezone=True), default=func.now())
     date_created = db.Column(db.DateTime(timezone=True), default=func.now())
     user_id = db.Column(db.Integer, db.ForeignKey(

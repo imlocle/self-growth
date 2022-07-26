@@ -1,6 +1,6 @@
 from os import path
 from flask import Flask
-from api.repository.db_repo import DB_NAME, db
+from src.repository.db_repo import DB_NAME, db
 
 
 def create_api():
@@ -9,10 +9,10 @@ def create_api():
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_NAME}"
     db.init_app(app)
     
-    from api.auth.auth_route import auth_blueprint
-    from api.blog.blog_post_route import blog_blueprint
-    from api.habit.habit_route import habit_blueprint
-    from api.to_do.to_do_route import to_do_blueprint
+    from src.auth.auth_route import auth_blueprint
+    from src.blog.blog_post_route import blog_blueprint
+    from src.habit.habit_route import habit_blueprint
+    from src.to_do.to_do_route import to_do_blueprint
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(blog_blueprint)
     app.register_blueprint(habit_blueprint)
@@ -24,6 +24,6 @@ def create_api():
     
 
 def create_database(app):
-    if not path.exists(f"api/{DB_NAME}"):
+    if not path.exists(f"src/{DB_NAME}"):
         db.create_all(app=app)
         print("Created Database!")

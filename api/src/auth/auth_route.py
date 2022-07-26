@@ -1,5 +1,4 @@
-import json
-from api.utils.constants import POST
+from src.utils.constants import POST
 from flask import Blueprint, jsonify, request
 
 auth_blueprint = Blueprint("auth", __name__)

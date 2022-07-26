@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
 
-from api.user.user import User
+from src.user.user import User
 
 pro_con_blueprint = Blueprint("pro_con_blueprint", __name__)
 

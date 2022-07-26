@@ -1,5 +1,5 @@
 from sqlalchemy.sql import func
-from api import db
+from src import db
 
 class BlogPost(db.Model):
     __tablename = "blog_post"

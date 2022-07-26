@@ -1,7 +1,7 @@
-from api.repository.db_repo import db
+from src.repository.db_repo import db
 from flask import Blueprint, jsonify, request
-from api.to_do.to_do_service import ToDoService
-from api.utils.constants import GET, POST
+from src.to_do.to_do_service import ToDoService
+from src.utils.constants import GET, POST
 
 to_do_blueprint = Blueprint("to_do", __name__)
 

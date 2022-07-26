@@ -1,5 +1,6 @@
-from api import db
-from api.user.user import User
+from src.user.user import User
+from src import db
+
 from werkzeug.security import check_password_hash, generate_password_hash
 
 
