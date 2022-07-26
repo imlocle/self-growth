@@ -1,6 +1,7 @@
-from src.blog.blog_post import BlogPost
 from src import db
+from src.blog.blog_post import BlogPost
 from src.user.user import User
+
 
 class BlogPostService:
     def __init__(self) -> None:

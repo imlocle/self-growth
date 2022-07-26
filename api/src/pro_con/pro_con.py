@@ -1,4 +1,4 @@
-from src.repository.db_repo import db
+from src import db
 from sqlalchemy.sql import func
 
 class ProCon(db.Model):

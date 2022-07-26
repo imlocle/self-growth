@@ -1,4 +1,4 @@
-from src.repository.db_repo import db
+from src import db
 from flask import Blueprint, jsonify, request
 from src.to_do.to_do_service import ToDoService
 from src.utils.constants import GET, POST

@@ -1,5 +1,5 @@
 from src.habit.habit import Habit
-from src.repository.db_repo import db
+from src import db
 from src.utils.constants import POST
 from flask import Blueprint, jsonify, request
 

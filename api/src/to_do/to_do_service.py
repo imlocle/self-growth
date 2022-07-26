@@ -1,5 +1,5 @@
 from src.to_do.to_do import ToDo
-from src.repository.db_repo import db
+from src import db
 
 class ToDoService:
     def __init__(self) -> None:
