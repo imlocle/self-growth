@@ -7,7 +7,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 class AuthService:
     def __init__(self) -> None:
         pass
-    
+
     def sign_up(self, data):
         email = data["email"]
         username = data["username"]
@@ -30,16 +30,19 @@ class AuthService:
         # elif len(email) < 4:
         #     flash("Email is invalid.", category='error')
         # else:
-        new_user = User(email=email, username=username, password=generate_password_hash(
-            password1, method='sha256'))
+        new_user = User(
+            email=email,
+            username=username,
+            password=generate_password_hash(password1, method="sha256"),
+        )
         db.session.add(new_user)
         db.session.commit()
-        print('User created!')
-    
+        print("User created!")
+
     def login(self, data):
         email = data["email"]
         password = data["password"]
-        
+
         user = User.query.filter_by(email=email).first()
         if user:
             if check_password_hash(user.password, password):

@@ -6,6 +6,7 @@ from flask import Blueprint, jsonify, request
 
 blog_blueprint = Blueprint("blog", __name__)
 
+
 @blog_blueprint.route("/user/<username>/blog-post/create", methods=[POST])
 def create_blog_post(username):
     req_data = request.get_json(force=True)
@@ -21,6 +22,7 @@ def delete_blog_post(username, id):
         db.session.delete(blog)
         db.session.commit()
         return jsonify({}), 200
+
 
 @blog_blueprint.route("/user/<username>/blog-post/list", methods=[GET])
 def list_user_blog_post(username):
