@@ -131,3 +131,5 @@ dmypy.json
 *notes.txt
 *DS_Store
 *.db
+
+/node_modules

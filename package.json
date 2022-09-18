@@ -1,0 +1,17 @@
+{
+  "name": "self-growth",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "",
+    "build": "",
+    "test": "",
+    "eject": "",
+    "api-install": "cd api && pip install -r requirements.txt",
+    "api-run": "cd api && flask run",
+    "api-test": "cd api && pytest -c pytest.ini"
+  },
+  "dependencies": {
+    "@tsconfig/node18": "^1.0.1"
+  }
+}

@@ -4,13 +4,12 @@ An API application to keep track of habits, to-dos, dailies, notes, blog post, p
 
 - Python: v3.10.5
 - pyenv
-- pipenv
 - [Flask](https://flask.palletsprojects.com/en/2.1.x/)
 
 ## Install Dependencies
 
 ```
-pipenv install
+pip
 ```
 
 ## Environment
@@ -18,7 +17,7 @@ pipenv install
 Activate a virtual environment.
 
 ```
-pipenv shell
+pip
 ```
 
 ## Run

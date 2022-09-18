@@ -11,6 +11,7 @@ class Habit(db.Model):
     change_routine = db.Column(db.Boolean, default=False)
     reward = db.Column(db.String(200))
     note = db.Column(db.Text)
+    stage = db.Column(db.String(100))
     habit_historys = db.relationship(
         "habit_history", backref="habit", passive_deletes=True
     )
