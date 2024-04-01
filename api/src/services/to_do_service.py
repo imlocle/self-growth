@@ -1,6 +1,5 @@
-from src.models.to_do import ToDoTable
+from src.models.to_do import ToDoSchemaRequest, ToDoTable
 from sqlalchemy.orm import Session
-from datetime import datetime
 from src.repositories.to_do_repository import ToDoRepository
 from typing import List
 
@@ -8,18 +7,17 @@ from typing import List
 class ToDoService:
 
     def __init__(self, session: Session) -> None:
-        self.todo_repo = ToDoRepository(session)
+        self.repo = ToDoRepository(session)
 
-    def create(self, data: dict) -> ToDoTable:
-        text: str = data["text"] if data["text"] is not None else None
-        date_due = data["date_due"] if data["date_due"] is not None else None
+    def create(self, request_todo: ToDoSchemaRequest) -> None:
+        try:
+            self.repo.create(request_todo)
+        except Exception as e:
+            raise e
 
-        if date_due:
-            date_due = datetime.fromisoformat(date_due)
-        to_do = ToDoTable(title=data["title"], text=text, date_due=date_due)
-        response = self.todo_repo.create(to_do)
-        return response
+    def get(self, todo_id: int) -> dict:
+        return self.repo.get(todo_id).to_dict()
 
     def get_all(self):
-        to_dos: List[ToDoTable] = self.todo_repo.get_all()
+        to_dos: List[ToDoTable] = self.repo.get_all()
         return [todo.to_dict() for todo in to_dos]
