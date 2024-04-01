@@ -23,12 +23,13 @@ class HabitRepository:
             elif isinstance(data, HabitEventsTable):
                 habit_history.append(HabitEventsSchemaResponse.from_dict(data.__dict__))
         habit.habit_events = habit_history
+        self.db_repo.close()
 
         return habit
 
     def create_habit(self, request_habit: HabitSchemaRequest) -> HabitSchemaResponse:
         habit = HabitTable(**request_habit.to_dict())
-        self.db_repo.create(habit, False)
+        self.db_repo.create(habit)
         return HabitSchemaResponse.from_dict(
             {"id": habit.id, **request_habit.to_dict()}
         )

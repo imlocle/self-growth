@@ -11,23 +11,39 @@ class HabitService:
         self.event_repo = HabitEventsRepository(session)
 
     def get_habit(self, habit_id: int) -> dict:
-        response = self.repo.get_habit(habit_id)
-        if not response:
-            raise NotFoundError(f"Habit ID: {habit_id}")
-        return response.to_dict()
+        try:
+            return self.repo.get_habit(habit_id).to_dict()
+        except Exception as e:
+            raise NotFoundError(e)
 
     def create_habit(self, request_habit: HabitSchemaRequest) -> None:
-        habit = self.repo.create_habit(request_habit)
-        habit_history = HabitEventsSchemaRequest(
-            habit_id=habit.id,
-            reset_counter=habit.reset_counter,
-        )
+        try:
+            habit = self.repo.create_habit(request_habit)
+            habit_event = HabitEventsSchemaRequest(
+                habit_id=habit.id,
+                reset_counter=habit.reset_counter,
+            )
 
-        self.event_repo.create_habit_event(habit_history)
+            self.event_repo.create_habit_event(habit_event)
+        except Exception as e:
+            raise e
+
+    def create_habit_event(self, request_habit_event: HabitEventsSchemaRequest):
+        try:
+            self.get_habit(request_habit_event.habit_id)
+            self.event_repo.create_habit_event(request_habit_event)
+        except Exception as e:
+            raise e
 
     def update_habit_event(self, event: HabitEventsSchemaRequest):
-        self.event_repo.update_habit_event(event)
+        try:
+            self.event_repo.update_habit_event(event)
+        except Exception as e:
+            raise e
 
     def delete_habit(self, habit_id: int):
-        self.repo.delete_habit(habit_id)
-        self.event_repo.delete_habit_events(habit_id)
+        try:
+            self.repo.delete_habit(habit_id)
+            self.event_repo.delete_habit_events(habit_id)
+        except Exception as e:
+            raise e

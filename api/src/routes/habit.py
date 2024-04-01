@@ -28,6 +28,13 @@ def update_habit_event():
     return {}, 204
 
 
+@HABIT.post("/habit/event/create")
+def create_habit_event():
+    event = HabitEventsSchemaRequest.from_dict(**request.json)
+    habit_service.create_habit_event(event)
+    return jsonify("Created"), 201
+
+
 @HABIT.delete("/habit/<habit_id>/delete")
 def delete_habit(habit_id: int):
     habit_service.delete_habit(habit_id)
