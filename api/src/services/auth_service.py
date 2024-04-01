@@ -1,6 +1,5 @@
-from src.user.user import User
 from src import db
-
+from src.user.user import User
 from werkzeug.security import check_password_hash, generate_password_hash
 
 
@@ -33,11 +32,12 @@ class AuthService:
         new_user = User(
             email=email,
             username=username,
-            password=generate_password_hash(password1, method="sha256"),
+            password=generate_password_hash(password1),
         )
         db.session.add(new_user)
         db.session.commit()
         print("User created!")
+        return new_user
 
     def login(self, data):
         email = data["email"]
