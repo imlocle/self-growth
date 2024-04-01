@@ -5,7 +5,6 @@ from src.models.habit import (
     HabitSchemaResponse,
     HabitTable,
     HabitSchemaRequest,
-    HabitEventsSchemaRequest,
 )
 from src.repositories.db_repository import DbRepository
 
@@ -34,9 +33,5 @@ class HabitRepository:
             {"id": habit.id, **request_habit.to_dict()}
         )
 
-    def create_habit_event(self, request_event: HabitEventsSchemaRequest) -> None:
-        event = HabitEventsTable(**request_event.to_dict())
-        self.db_repo.create(event)
-
-    def update_habit_event(self, event: HabitEventsSchemaRequest):
-        self.db_repo.update(event, HabitEventsTable)
+    def delete_habit(self, habit_id: int):
+        self.db_repo.delete(habit_id, HabitTable)

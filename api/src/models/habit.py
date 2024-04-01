@@ -58,6 +58,7 @@ class HabitSchemaRequest:
     difficulty_level: EnumField(DifficultyLevelEnum, by_value=True)  # type: ignore
     reset_counter: EnumField(ResetCounterEnum, by_value=True)  # type: ignore
     note: str
+    status: EnumField(StatusEnum, by_value=True)  # type: ignore
 
 
 @dataclass_json
@@ -85,8 +86,9 @@ class HabitTable(BASE):
     # reward = Column(String(200))
     note = Column(Text, default=None)
     # stage = Column(String(100))
+    status = Column(Enum(StatusEnum))
     habit_events = relationship(
-        "HabitEventsTable", backref="habit", passive_deletes=True
+        "HabitEventsTable", backref="habits", cascade="all, delete"
     )
     # user_id = Column(Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
     date_started = Column(DateTime(timezone=True), default=func.now())

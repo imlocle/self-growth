@@ -14,5 +14,6 @@ class ResetCounterEnum(str, Enum):
     monthly = "monthly"
 
 class StatusEnum(str, Enum):
+    deleted = "deleted"
     new = "new"
     completed = "completed"
