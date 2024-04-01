@@ -2,26 +2,46 @@ An API application to keep track of habits, to-dos, dailies, notes, blog post, p
 
 # Technology
 
-- Python: v3.10.5
+- Python: v3.12.0
 - pyenv
-- [Flask](https://flask.palletsprojects.com/en/2.1.x/)
-
-## Install Dependencies
-
-```
-pip
-```
+- [Flask](https://flask.palletsprojects.com/en/3.0.x/)
 
 ## Environment
 
-Activate a virtual environment.
+Create a virtual environment.
 
+```bash
+python -m venv .venv
 ```
-pip
+
+Activate virtual environment.
+
+```bash
+source .venv/bin/activate
+```
+
+## Install Dependencies
+
+Go to `api` directory then input:
+
+```bash
+pip install -r requirements.txt
 ```
 
 ## Run
 
-```
+```bash
 flask run
 ```
+
+### Create database migration
+
+  ```bash
+  alembic revision --autogenerate -m "Description here"
+  ```
+
+### Run database migrations
+
+  ```bash
+  alembic upgrade head
+  ```
