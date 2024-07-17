@@ -11,12 +11,7 @@ class DbRepository:
         self.session = session
 
     def get(self, id: str, table):
-        try:
-            return self.session.query(table).filter_by(id=id).first()
-        except Exception as e:
-            raise e
-        finally:
-            self.session.close()
+        return self.session.query(table).filter_by(id=id).first()
 
     def get_join(self, id: str, table1, table2):
         return (

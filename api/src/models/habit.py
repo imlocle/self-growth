@@ -1,3 +1,8 @@
+from dataclasses import dataclass, field
+from dataclasses_json import config, DataClassJsonMixin
+from datetime import datetime
+from marshmallow import fields
+from marshmallow_enum import EnumField
 from sqlalchemy import (
     Column,
     DateTime,
@@ -10,27 +15,20 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from src.database.session import BASE
-from dataclasses_json import dataclass_json, config
-from dataclasses import dataclass, field
-from marshmallow import fields
-from marshmallow_enum import EnumField
-from typing import List, Optional
-from datetime import datetime
 from src.models.enum import DifficultyLevelEnum, ResetCounterEnum, StatusEnum
+from typing import List, Optional
 
 
-@dataclass_json
 @dataclass
-class HabitEventsSchemaRequest:
+class HabitEventsSchemaRequest(DataClassJsonMixin):
     habit_id: int
     reset_counter: EnumField(ResetCounterEnum, by_value=True)  # type: ignore
     status: EnumField(StatusEnum, by_value=True) = StatusEnum.new.value  # type: ignore
     id: Optional[int] = None
 
 
-@dataclass_json
 @dataclass
-class HabitEventsSchemaResponse:
+class HabitEventsSchemaResponse(DataClassJsonMixin):
     status: EnumField(StatusEnum, by_value=True)  # type: ignore
     habit_id: int
     reset_counter: EnumField(ResetCounterEnum, by_value=True)  # type: ignore
@@ -51,9 +49,8 @@ class HabitEventsSchemaResponse:
     id: Optional[int] = None
 
 
-@dataclass_json
 @dataclass
-class HabitSchemaRequest:
+class HabitSchemaRequest(DataClassJsonMixin):
     title: str
     difficulty_level: EnumField(DifficultyLevelEnum, by_value=True)  # type: ignore
     reset_counter: EnumField(ResetCounterEnum, by_value=True)  # type: ignore
@@ -61,9 +58,8 @@ class HabitSchemaRequest:
     status: EnumField(StatusEnum, by_value=True)  # type: ignore
 
 
-@dataclass_json
 @dataclass
-class HabitSchemaResponse:
+class HabitSchemaResponse(DataClassJsonMixin):
     id: int
     title: str
     difficulty_level: EnumField(DifficultyLevelEnum, by_value=True)  # type: ignore
@@ -88,7 +84,7 @@ class HabitTable(BASE):
     # stage = Column(String(100))
     status = Column(Enum(StatusEnum))
     habit_events = relationship(
-        "HabitEventsTable", backref="habits", cascade="all, delete"
+        "HabitEventsTable", backref="habit", cascade="all, delete"
     )
     # user_id = Column(Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
     date_started = Column(DateTime(timezone=True), default=func.now())

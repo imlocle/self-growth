@@ -1,5 +1,8 @@
-from src.models.enum import StatusEnum
-from src.database.session import BASE
+from dataclasses import dataclass, field
+from dataclasses_json import config, DataClassJsonMixin
+from datetime import datetime
+from marshmallow import fields
+from marshmallow_enum import EnumField
 from sqlalchemy import (
     Enum,
     Column,
@@ -9,24 +12,19 @@ from sqlalchemy import (
     Text,
 )
 from sqlalchemy.sql import func
-from dataclasses_json import dataclass_json, config
-from dataclasses import dataclass, field
-from marshmallow_enum import EnumField
-from datetime import datetime
-from marshmallow import fields
+from src.database.session import BASE
+from src.models.enum import StatusEnum
 
 
-@dataclass_json
 @dataclass
-class ToDoSchemaRequest:
+class ToDoSchemaRequest(DataClassJsonMixin):
     title: str
     text: str
     status: EnumField(StatusEnum, by_value=True)  # type: ignore
 
 
-@dataclass_json
 @dataclass
-class ToDoSchemaResponse:
+class ToDoSchemaResponse(DataClassJsonMixin):
     id: int
     title: str
     text: str

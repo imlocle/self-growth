@@ -21,7 +21,7 @@ def create_habit():
     return jsonify("Created"), 201
 
 
-@HABIT.patch("/habit/update/event")
+@HABIT.patch("/habit/event/update")
 def update_habit_event():
     event = HabitEventsSchemaRequest.from_dict(request.json)
     habit_service.update_habit_event(event)
