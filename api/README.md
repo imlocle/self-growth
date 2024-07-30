@@ -1,6 +1,8 @@
+# Self-Growth API
+
 An API application to keep track of habits, to-dos, dailies, notes, blog post, pro-con list.
 
-# Technology
+## Technology
 
 - Python: v3.12.0
 - pyenv

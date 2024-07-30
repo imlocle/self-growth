@@ -8,10 +8,11 @@ class DifficultyLevelEnum(str, Enum):
     hard = "hard"
 
 
-class ResetCounterEnum(str, Enum):
+class CounterOptionEnum(str, Enum):
     daily = "daily"
     weekly = "weekly"
     monthly = "monthly"
+
 
 class StatusEnum(str, Enum):
     active = "active"

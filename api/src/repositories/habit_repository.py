@@ -1,10 +1,11 @@
+from typing import List
 from sqlalchemy.orm import Session
 from src.models.habit import (
-    HabitEventsSchemaResponse,
-    HabitEventsTable,
     HabitSchemaResponse,
     HabitTable,
     HabitSchemaRequest,
+    HabitEventsSchemaResponse,
+    HabitEventsTable,
 )
 from src.repositories.db_repository import DbRepository
 
@@ -12,6 +13,11 @@ from src.repositories.db_repository import DbRepository
 class HabitRepository:
     def __init__(self, session: Session) -> None:
         self.db_repo = DbRepository(session)
+
+    def get_all(self) -> List[HabitTable] | None:
+        response = self.db_repo.get_all(HabitTable)
+        self.db_repo.close()
+        return response
 
     def get_habit(self, habit_id: str) -> HabitSchemaResponse | None:
         habit = None

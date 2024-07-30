@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
+from src.models.enum import StatusEnum
 from src.database.session import get_db_session
-from src.models.habit import HabitEventsSchemaRequest, HabitSchemaRequest
+from src.models.habit import HabitSchemaRequest, HabitEventsSchemaRequest
 from src.repositories.db_repository import DB_PATH
 from src.services.habit_service import HabitService
 
@@ -14,9 +15,14 @@ def get(habit_id: int):
     return jsonify(habit_service.get_habit(habit_id)), 200
 
 
+@HABIT.get("/habits")
+def get_all():
+    return jsonify(habit_service.get_all()), 200
+
+
 @HABIT.post("/habit/create")
 def create_habit():
-    habit = HabitSchemaRequest.from_dict({"status": "new", **request.json})
+    habit = HabitSchemaRequest.from_dict({"status": StatusEnum.new, **request.json})
     habit_service.create_habit(habit)
     return jsonify("Created"), 201
 
