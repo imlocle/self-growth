@@ -1,0 +1,4 @@
+dataclasses-json
+pytest
+mypy-boto3-dynamodb
+boto3
