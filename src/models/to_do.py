@@ -1,28 +1,34 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 import json
 from typing import Any, Dict, Optional
 
-from src.models.enum import StatusEnum
+from models.enum import StatusEnum
+
 
 @dataclass
 class ToDo:
+    id: str
     title: str
-    description: Optional[str]
+    date_created: str
+    date_modified: str
+    description: Optional[str] = None
     status: StatusEnum = StatusEnum.NEW
 
+    # ---------- Constructors ----------
+
     @classmethod
-    def from_event(cls, event: Dict[str, Any]) -> "ToDo":
-        """
-        Build a ToDo from an API Gateway event.
-        """
-        body_str = event.get("body", "{}")
+    def from_event(cls, event: Dict[str, Any]) -> ToDo:
+        body_str = event.get("body") or "{}"
         body = json.loads(body_str)
         return cls.from_dict(body)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "ToDo":
+    def from_dict(cls, data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Build a ToDo from a plain dict.
+        Convert a raw dict into a coherent ToDo *input* dict.
+        Does NOT assign id or timestamps — service layer does that.
         """
         title = data.get("title")
         if not isinstance(title, str) or not title.strip():
@@ -38,47 +44,50 @@ class ToDo:
                 f"Expected one of: {[s.value for s in StatusEnum]}"
             )
 
-        return cls(
-            title=title,
-            description=data.get("description"),
-            status=status,
-        )
-    
-    @classmethod
-    def from_json(cls, json_str: str) -> "ToDo":
-        """
-        Build a ToDo from a JSON string.
-        """
-        data = json.loads(json_str)
-        return cls.from_dict(data)
+        return {
+            "title": title,
+            "description": data.get("description"),
+            "status": status,
+        }
 
     @classmethod
-    def from_dynamo(cls, item: Dict[str, Any]) -> "ToDo":
+    def from_dynamo(cls, item: Dict[str, Any]) -> ToDo:
         """
         Build a ToDo from a DynamoDB item.
         """
         return cls(
+            id=item["id"],
             title=item["title"],
             description=item.get("description"),
             status=StatusEnum(item["status"]),
+            date_created=item["date_created"],
+            date_modified=item["date_modified"],
         )
+
+    # ---------- Output Methods ----------
 
     def to_dict(self) -> Dict[str, Any]:
         """
-        Convert to a JSON-serializable dict.
+        Convert to a JSON-safe dict for API responses.
         """
         return {
+            "id": self.id,
             "title": self.title,
             "description": self.description,
             "status": self.status.value,
+            "date_created": self.date_created,
+            "date_modified": self.date_modified,
         }
 
     def to_dynamo(self) -> Dict[str, Any]:
         """
-        Convert to DynamoDB format.
+        Convert to a DynamoDB item dict.
         """
         return {
+            "id": self.id,
             "title": self.title,
             "description": self.description,
             "status": self.status.value,
+            "date_created": self.date_created,
+            "date_modified": self.date_modified,
         }

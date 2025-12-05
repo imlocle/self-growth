@@ -36,14 +36,14 @@ class DynamodbService:
 
         return items
 
-    def get(self, request: GetItemInputTableGetItemTypeDef) -> dict:
+    def get(self, request: GetItemInputTableGetItemTypeDef) -> Dict | None:
         get_request = self._enhance_request(request, {"ReturnConsumedCapacity": "NONE"})
         try:
             response: dict = self.Table.get_item(**get_request)
         except ClientError as err:
             raise
         else:
-            return response.get("Item", {})
+            return response.get("Item", None)
 
     def put(
         self, request: PutItemInputTablePutItemTypeDef

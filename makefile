@@ -7,14 +7,16 @@
 # $ make deploy            # defaults to dev
 # $ make clean             # remove all build artifacts
 
-.PHONY: deploy zip-all zip-layer zip-template clean generate-backend-config
+.PHONY: deploy zip-all zip-layer zip-create-todo zip-get-todo zip-get-all-todo clean generate-backend-config
 
 ENV ?= dev
-PROJECT_NAME = hello_world
+PROJECT_NAME = self-growth
 REGION = us-west-1
 BUILD_DIR = terraform/builds
 LAYER_ZIP = $(BUILD_DIR)/python.zip
-LAMBDA_1 = $(BUILD_DIR)/lambda_1-$(ENV).zip
+CREATE_TODO = $(BUILD_DIR)/create-todo-$(ENV).zip
+GET_TODO = $(BUILD_DIR)/get-todo-$(ENV).zip
+GET_ALL_TODO = $(BUILD_DIR)/get-all-todo-$(ENV).zip
 BACKEND_CONFIG_TMP = terraform/backend.auto.hcl
 
 # Clean all build artifacts
@@ -39,11 +41,17 @@ zip-layer: $(BUILD_DIR)
 	cd lambda_layer && zip -r ../$(LAYER_ZIP) python > /dev/null
 
 # Zip full src directory for each Lambda
-zip-template: $(BUILD_DIR)
-	cd src && zip -r ../$(LAMBDA_1) . > /dev/null
+zip-create-todo: $(BUILD_DIR)
+	cd src && zip -r ../$(CREATE_TODO) . > /dev/null
+
+zip-get-todo: $(BUILD_DIR)
+	cd src && zip -r ../$(GET_TODO) . > /dev/null
+
+zip-get-all-todo: $(BUILD_DIR)
+	cd src && zip -r ../$(GET_ALL_TODO) . > /dev/null
 
 # Run all zipping steps
-zip-all: zip-layer zip-template
+zip-all: zip-layer zip-create-todo zip-get-todo zip-get-all-todo
 
 # Generate dynamic backend config file
 generate-backend-config:

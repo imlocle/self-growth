@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict, Any
 from datetime import datetime
-from src.models.enum import VisibilityEnum
+from models.enum import VisibilityEnum
 
 
 @dataclass
