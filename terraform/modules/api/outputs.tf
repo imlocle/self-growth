@@ -1,11 +1,11 @@
-output "api_1_id" {
-  value = module.api_1.api_id
+output "self_growth_api_id" {
+  value = module.self_growth_api.api_id
 }
 
-output "api_1_execution_arn" {
-  value = module.api_1.api_execution_arn
+output "self_growth_api_execution_arn" {
+  value = module.self_growth_api.api_execution_arn
 }
 
-output "api_1_endpoint" {
-  value = module.api_1.api_endpoint
+output "self_growth_api_endpoint" {
+  value = module.self_growth_api.api_endpoint
 }

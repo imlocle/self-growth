@@ -1,3 +1,3 @@
-output "api_1_endpoint" {
-  value = module.api.api_1_endpoint
+output "self_growth_api_endpoint" {
+  value = module.api.self_growth_api_endpoint
 }

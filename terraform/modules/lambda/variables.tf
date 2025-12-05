@@ -6,11 +6,11 @@ variable "project_name" {
   type = string
 }
 
-variable "table_1_table_arn" {
+variable "self_growth_table_arn" {
   type = string
 }
 
-variable "table_1_table_id" {
+variable "self_growth_table_id" {
   type = string
 }
 

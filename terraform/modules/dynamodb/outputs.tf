@@ -1,7 +1,7 @@
-output "table_1_table_arn" {
-  value = module.table_1.table_1_table_arn
+output "self_growth_table_arn" {
+  value = module.self_growth_table.self_growth_table_arn
 }
 
-output "table_1_table_id" {
-  value = module.table_1.table_1_table_id
+output "self_growth_table_id" {
+  value = module.self_growth_table.self_growth_table_id
 }

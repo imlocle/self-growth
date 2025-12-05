@@ -16,6 +16,7 @@ provider "aws" {
 module "dynamodb" {
   source      = "./modules/dynamodb"
   environment = var.environment
+  project_name = var.project_name
 }
 
 module "api" {
@@ -28,9 +29,9 @@ module "lambda" {
   source            = "./modules/lambda"
   environment       = var.environment
   project_name      = var.project_name
-  table_1_table_arn = module.dynamodb.table_1_table_arn
-  table_1_table_id  = module.dynamodb.table_1_table_id
-  api_execution_arn = module.api.api_1_execution_arn
-  api_id            = module.api.api_1_id
+  self_growth_table_arn = module.dynamodb.self_growth_table_arn
+  self_growth_table_id  = module.dynamodb.self_growth_table_id
+  api_execution_arn = module.api.self_growth_api_execution_arn
+  api_id            = module.api.self_growth_api_id
   runtime           = var.runtime
 }
