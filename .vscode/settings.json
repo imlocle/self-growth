@@ -1,6 +1,4 @@
 {
-  "python.formatting.provider": "none",
-  "[python]": {
-    "editor.defaultFormatter": "ms-python.black-formatter"
-  }
+  "makefile.configureOnOpen": false,
+  "python.defaultInterpreterPath": ".venv/bin/python"
 }

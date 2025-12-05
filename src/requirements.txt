@@ -1,4 +1,4 @@
-dataclasses-json
-pytest
-mypy-boto3-dynamodb
-boto3
+boto3==1.42.3
+dataclasses-json==0.6.7
+mypy-boto3-dynamodb==1.42.3
+pytest==9.0.1
