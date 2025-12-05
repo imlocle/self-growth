@@ -9,9 +9,9 @@ class GetToDoHandler:
     def handler(self):
         try:
             item = self.controller.get()
-            if not item:
-                return error_response(message="Not Found", status_code=404)
             return success_response(body=item.to_dict())
+        except ValueError as e:
+            return error_response(message=str(e), status_code=404)
         except Exception as e:
             return error_response(message=str(e))
 

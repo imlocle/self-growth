@@ -1,7 +1,7 @@
 import json
 from typing import Any, Dict
 from services.todo_service import ToDoService
-from src.models.todo import ToDo
+from models.todo import ToDo
 
 
 class ToDoController:
@@ -13,8 +13,8 @@ class ToDoController:
         self.body = json.loads(body_str)
         self.todo_service = todo_service or ToDoService()
 
-    def create(self) -> None:
-        self.todo_service.create(self.user_id, self.body)
+    def create(self) -> ToDo:
+        return self.todo_service.create(self.user_id, self.body)
 
     def get(self) -> ToDo | None:
         todo_id = self.event.get("pathParameters", {}).get("todoId")

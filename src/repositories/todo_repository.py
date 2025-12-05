@@ -1,7 +1,7 @@
 import os
 from typing import Dict
 from aws.dynamodb_service import DynamodbService
-from src.models.todo import ToDo
+from models.todo import ToDo
 from mypy_boto3_dynamodb.type_defs import (
     PutItemInputTablePutItemTypeDef,
     GetItemInputTableGetItemTypeDef,

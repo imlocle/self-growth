@@ -64,7 +64,7 @@ class DynamodbService:
         response: dict = self.Table.query(**request)
         return {
             "items": response.get("Items", []),
-            "lastEvaluatedKey": response.get("LastEvaluatedKey", None),
+            "lastEvaluatedKey": response.get("LastEvaluatedKey"),
         }
 
     def scan(
@@ -73,7 +73,7 @@ class DynamodbService:
         response: dict = self.Table.scan(**request)
         return {
             "items": response.get("Items", []),
-            "lastEvaluatedKey": response.get("LastEvaluatedKey", None),
+            "lastEvaluatedKey": response.get("LastEvaluatedKey"),
         }
 
     def delete(

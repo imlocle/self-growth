@@ -8,8 +8,10 @@ class CreateToDoHandler:
 
     def handler(self):
         try:
-            self.controller.create()
-            return success_response(body={"message": "Created To Do"}, status_code=201)
+            item = self.controller.create()
+            return success_response(body=item.to_dict(), status_code=201)
+        except ValueError as e:
+            return error_response(message=str(e), status_code=400)
         except Exception as e:
             return error_response(message=str(e))
 
