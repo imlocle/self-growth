@@ -5,7 +5,7 @@ data "aws_caller_identity" "current" {}
 #####################################
 
 resource "aws_iam_role" "this" {
-  name = "${var.lambda_name}-lambda-role-${var.environment}"
+  name = "${var.project_name}-${var.lambda_name}-lambda-role-${var.environment}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
@@ -24,7 +24,7 @@ resource "aws_iam_role" "this" {
 #####################################
 
 resource "aws_iam_role_policy" "lambda_policy" {
-  name = "${var.lambda_name}-lambda-policy-${var.environment}"
+  name = "${var.project_name}-${var.lambda_name}-lambda-policy-${var.environment}"
   role = aws_iam_role.this.id
   policy = jsonencode({
     Version = "2012-10-17",
@@ -42,6 +42,7 @@ resource "aws_iam_role_policy" "lambda_policy" {
         Effect = "Allow",
         Action = [
           "dynamodb:GetItem",
+          "dynamodb:PutItem"
         ],
         Resource = [
           "${var.self_growth_table_arn}",
@@ -67,7 +68,7 @@ resource "aws_iam_role_policy_attachment" "lambda_basic" {
 
 resource "aws_lambda_function" "this" {
   function_name = "${var.lambda_name}-${var.environment}"
-  handler       = "handlers.todos.get_todo.lambda_handler"
+  handler       = "handlers.todos.update_todo.lambda_handler"
   runtime       = var.runtime
   role          = aws_iam_role.this.arn
   timeout       = 30
@@ -125,7 +126,7 @@ resource "aws_apigatewayv2_integration" "this" {
 
 resource "aws_apigatewayv2_route" "this" {
   api_id    = var.api_id
-  route_key = "GET /${var.lambda_name}/{todoId}"
+  route_key = "PUT /${var.lambda_name}/{todoId}"
   target    = "integrations/${aws_apigatewayv2_integration.this.id}"
 }
 

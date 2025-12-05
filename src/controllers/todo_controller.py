@@ -1,7 +1,7 @@
 import json
 from typing import Any, Dict
 from services.todo_service import ToDoService
-from models.to_do import ToDo
+from src.models.todo import ToDo
 
 
 class ToDoController:

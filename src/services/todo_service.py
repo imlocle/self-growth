@@ -1,6 +1,6 @@
 from typing import Any, Dict
 from repositories.todo_repository import ToDoRepository
-from models.to_do import ToDo
+from src.models.todo import ToDo
 from models.enum import StatusEnum
 from utils.helper import generate_id, utc_now_iso
 

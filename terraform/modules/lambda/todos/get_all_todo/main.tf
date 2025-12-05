@@ -5,7 +5,7 @@ data "aws_caller_identity" "current" {}
 #####################################
 
 resource "aws_iam_role" "this" {
-  name = "${var.lambda_name}-lambda-role-${var.environment}"
+  name = "${var.project_name}-${var.lambda_name}-lambda-role-${var.environment}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
@@ -24,7 +24,7 @@ resource "aws_iam_role" "this" {
 #####################################
 
 resource "aws_iam_role_policy" "lambda_policy" {
-  name = "${var.lambda_name}-lambda-policy-${var.environment}"
+  name = "${var.project_name}-${var.lambda_name}-lambda-policy-${var.environment}"
   role = aws_iam_role.this.id
   policy = jsonencode({
     Version = "2012-10-17",
