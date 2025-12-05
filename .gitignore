@@ -208,7 +208,7 @@ __marimo__/
 
 # Ignore Lambda build outputs
 terraform/builds/
-lambda_layer/py*
+lambda_layer/
 .terraform/
 *.hcl
 *.tfstate*
