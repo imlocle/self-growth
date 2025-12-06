@@ -1,12 +1,14 @@
 import os
 from typing import Dict
-from aws.dynamodb_service import DynamodbService
-from models.todo import ToDo
+
 from mypy_boto3_dynamodb.type_defs import (
     PutItemInputTablePutItemTypeDef,
     GetItemInputTableGetItemTypeDef,
     QueryInputTableQueryTypeDef,
 )
+
+from aws.dynamodb_service import DynamodbService
+from models.todo import ToDo
 
 
 class ToDoRepository:
@@ -34,9 +36,9 @@ class ToDoRepository:
 
     def get_all(self, user_id: str) -> Dict:
         query_params: QueryInputTableQueryTypeDef = {
-            "KeyConditionExpression": "#pk = :pk",
-            "ExpressionAttributeNames": {"#pk": "pk"},
-            "ExpressionAttributeValues": {":pk": f"USER#{user_id}"},
+            "KeyConditionExpression": "#pk = :pk AND begins_with(#sk, :sk)",
+            "ExpressionAttributeNames": {"#pk": "pk", "#sk": "sk"},
+            "ExpressionAttributeValues": {":pk": f"USER#{user_id}", ":sk": f"TODO#"},
         }
         return self.dynamodb_service.query(query_params)
 

@@ -57,7 +57,7 @@ zip-layer: $(BUILD_DIR)
 #   make zip-get-todo
 #   ...
 zip-%: $(BUILD_DIR)
-	cd src && zip -r ../$(BUILD_DIR)/$*-$(ENV).zip . > /dev/null
+	cd src && zip -r ../$(BUILD_DIR)/${PROJECT_NAME}-$*-$(ENV).zip . > /dev/null
 
 #####################################
 # Zip all code (layer + lambdas)

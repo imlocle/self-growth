@@ -1,7 +1,8 @@
 from typing import Any, Dict
-from repositories.todo_repository import ToDoRepository
+
 from models.todo import ToDo
 from models.enum import StatusEnum
+from repositories.todo_repository import ToDoRepository
 from utils.helper import generate_id, utc_now_iso
 
 
@@ -12,13 +13,11 @@ class ToDoService:
     def create(self, user_id: str, data: dict) -> ToDo:
         timestamp = utc_now_iso()
 
-        if "title" not in data:
-            raise ValueError("Title must be a non-empty string")
-
         todo = ToDo(
             id=generate_id(), date_created=timestamp, date_modified=timestamp, **data
         )
         self.todo_repo.create(user_id, todo)
+
         return todo
 
     def get(self, user_id: str, todo_id: str) -> ToDo:

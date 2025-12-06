@@ -83,11 +83,4 @@ class ToDo:
         """
         Convert to a DynamoDB item dict.
         """
-        return {
-            "id": self.id,
-            "title": self.title,
-            "description": self.description,
-            "status": self.status.value,
-            "date_created": self.date_created,
-            "date_modified": self.date_modified,
-        }
+        return self.to_dict()

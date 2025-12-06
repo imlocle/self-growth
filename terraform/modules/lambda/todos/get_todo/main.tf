@@ -1,11 +1,17 @@
 data "aws_caller_identity" "current" {}
 
+locals {
+  name          = "${var.project_name}-${var.lambda_name}"
+  function_name = "${local.name}-${var.environment}"
+  handler_path  = replace(var.lambda_name, "-", "_")
+}
+
 #####################################
 # Lambda Role
 #####################################
 
 resource "aws_iam_role" "this" {
-  name = "${var.project_name}-${var.lambda_name}-lambda-role-${var.environment}"
+  name = "${local.name}-lambda-role-${var.environment}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
@@ -24,7 +30,7 @@ resource "aws_iam_role" "this" {
 #####################################
 
 resource "aws_iam_role_policy" "lambda_policy" {
-  name = "${var.project_name}-${var.lambda_name}-lambda-policy-${var.environment}"
+  name = "${local.name}-lambda-policy-${var.environment}"
   role = aws_iam_role.this.id
   policy = jsonencode({
     Version = "2012-10-17",
@@ -66,14 +72,14 @@ resource "aws_iam_role_policy_attachment" "lambda_basic" {
 #####################################
 
 resource "aws_lambda_function" "this" {
-  function_name = "${var.lambda_name}-${var.environment}"
-  handler       = "handlers.todos.get_todo.lambda_handler"
+  function_name = local.function_name
+  handler       = "handlers.todos.${local.handler_path}.lambda_handler"
   runtime       = var.runtime
   role          = aws_iam_role.this.arn
   timeout       = 30
 
-  filename         = "${path.root}/builds/${var.lambda_name}-${var.environment}.zip"
-  source_code_hash = filebase64sha256("${path.root}/builds/${var.lambda_name}-${var.environment}.zip")
+  filename         = "${path.root}/builds/${local.function_name}.zip"
+  source_code_hash = filebase64sha256("${path.root}/builds/${local.function_name}.zip")
 
   layers = [aws_lambda_layer_version.common_dependencies.arn]
   depends_on = [null_resource.force_lambda_update,
@@ -125,7 +131,7 @@ resource "aws_apigatewayv2_integration" "this" {
 
 resource "aws_apigatewayv2_route" "this" {
   api_id    = var.api_id
-  route_key = "GET /${var.lambda_name}/{todoId}"
+  route_key = "GET /todo/{todoId}"
   target    = "integrations/${aws_apigatewayv2_integration.this.id}"
 }
 
@@ -139,6 +145,6 @@ resource "null_resource" "force_lambda_update" {
   }
 
   provisioner "local-exec" {
-    command = "touch ${path.root}/builds/${var.lambda_name}-${var.environment}.zip"
+    command = "touch ${path.root}/builds/${local.function_name}.zip"
   }
 }

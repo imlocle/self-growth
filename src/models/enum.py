@@ -13,6 +13,7 @@ class CounterOptionEnum(str, Enum):
     MONTHLY = "monthly"
     WEEKLY = "weekly"
 
+
 class StatusEnum(str, Enum):
     ACTIVE = "active"
     DELETED = "deleted"
@@ -20,13 +21,20 @@ class StatusEnum(str, Enum):
     COMPLETED = "completed"
 
 
-class HabitType(str, Enum):
+class HabitTypeEnum(str, Enum):
     BUILD = "build"
     QUIT = "quit"
 
-class HabitEventType(str, Enum):
+
+class HabitEventTypeEnum(str, Enum):
     SUCCESS = "success"
     RESET = "reset"
+
+
+class HabitStatusEnum(str, Enum):
+    ACTIVE = "active"
+    ARCHIVED = "archived"
+
 
 class VisibilityEnum(str, Enum):
     PRIVATE = "private"
