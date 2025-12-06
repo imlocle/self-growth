@@ -18,7 +18,7 @@ class ToDoController:
     def create(self) -> ToDo:
         return self.todo_service.create(self.user_id, self.data)
 
-    def get(self) -> ToDo | None:
+    def get(self) -> ToDo:
         todo_id = self._get_path_params_id()
         return self.todo_service.get(self.user_id, todo_id)
 
@@ -29,7 +29,7 @@ class ToDoController:
             "lastEvaluatedKey": response.get("lastEvaluatedKey", None),
         }
 
-    def update(self) -> ToDo | None:
+    def update(self) -> ToDo:
         todo_id = self._get_path_params_id()
         return self.todo_service.update(
             user_id=self.user_id, todo_id=todo_id, data=self.data

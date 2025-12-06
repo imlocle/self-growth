@@ -18,7 +18,7 @@ class HabitController:
     def create(self) -> Habit:
         return self.habit_service.create(self.user_id, self.data)
 
-    def get(self) -> Habit | None:
+    def get(self) -> Habit:
         habit_id = self._get_path_params_id()
         return self.habit_service.get(self.user_id, habit_id)
 
@@ -26,10 +26,10 @@ class HabitController:
         response = self.habit_service.get_all(self.user_id)
         return {
             "items": [i.to_dict() for i in response.get("items")],
-            "lastEvaluatedKey": response.get("lastEvaluatedKey", None),
+            "lastEvaluatedKey": response.get("lastEvaluatedKey"),
         }
 
-    def update(self) -> Habit | None:
+    def update(self) -> Habit:
         habit_id = self._get_path_params_id()
         return self.habit_service.update(
             user_id=self.user_id, habit_id=habit_id, data=self.data

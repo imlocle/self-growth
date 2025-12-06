@@ -18,8 +18,8 @@ class UserProfileController:
     def create(self) -> UserProfile:
         return self.user_profile_service.create(self.data)
 
-    def get(self) -> UserProfile | None:
+    def get(self) -> UserProfile:
         return self.user_profile_service.get(self.user_id)
 
-    def update(self) -> UserProfile | None:
+    def update(self) -> UserProfile:
         return self.user_profile_service.update(user_id=self.user_id, data=self.data)

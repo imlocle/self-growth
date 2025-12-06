@@ -3,6 +3,7 @@ from typing import Any, Dict
 from models.enum import HabitStatusEnum, HabitTypeEnum
 from models.habit import Habit
 from repositories.habit_repository import HabitRepository
+from utils.error_util import NotFoundError
 from utils.helper import generate_id, utc_now_iso
 
 
@@ -24,7 +25,7 @@ class HabitService:
     def get(self, user_id: str, habit_id: str) -> Habit:
         item = self.habit_repo.get(user_id, habit_id)
         if not item:
-            raise ValueError("Not Found")
+            raise NotFoundError("Not Found")
         return Habit.from_dynamo(item)
 
     def get_all(self, user_id: str) -> Dict[str, Any]:
@@ -37,7 +38,7 @@ class HabitService:
     def update(self, user_id: str, habit_id: str, data: dict) -> Habit:
         existing = self.habit_repo.get(user_id=user_id, habit_id=habit_id)
         if not existing:
-            raise ValueError("Not Found")
+            raise NotFoundError("Not Found")
 
         if "title" in data:
             title = data["title"]

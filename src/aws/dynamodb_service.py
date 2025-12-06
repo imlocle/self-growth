@@ -19,9 +19,10 @@ class DynamodbService:
 
     @staticmethod
     def _enhance_request(
-        request: dict[str, any], default: dict[str, any] = dict()
-    ) -> dict[str, Any]:
-        return default | request
+        request: Dict[str, Any], default: Dict[str, Any] | None = None
+    ) -> Dict[str, Any]:
+        default = default or {}
+        return {**default, **request}
 
     def batch_get(self, request: Dict[str, Any]) -> List[Dict[str, Any]]:
         try:

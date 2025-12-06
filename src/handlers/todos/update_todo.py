@@ -1,4 +1,5 @@
 from controllers.todo_controller import ToDoController
+from utils.error_util import NotFoundError
 from utils.response_util import error_response, success_response
 
 
@@ -10,8 +11,10 @@ class UpdateToDoHandler:
         try:
             item = self.controller.update()
             return success_response(body=item.to_dict())
-        except ValueError as e:
+        except NotFoundError as e:
             return error_response(message=str(e), status_code=404)
+        except ValueError as e:
+            return error_response(message=str(e), status_code=400)
         except Exception as e:
             return error_response(message=str(e))
 

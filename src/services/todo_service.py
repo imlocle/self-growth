@@ -3,6 +3,7 @@ from typing import Any, Dict
 from models.enum import StatusEnum
 from models.todo import ToDo
 from repositories.todo_repository import ToDoRepository
+from utils.error_util import NotFoundError
 from utils.helper import generate_id, utc_now_iso
 
 
@@ -23,7 +24,7 @@ class ToDoService:
     def get(self, user_id: str, todo_id: str) -> ToDo:
         item = self.todo_repo.get(user_id, todo_id)
         if not item:
-            raise ValueError("Not Found")
+            raise NotFoundError("Not Found")
         return ToDo.from_dynamo(item)
 
     def get_all(self, user_id: str) -> Dict[str, Any]:
@@ -36,7 +37,7 @@ class ToDoService:
     def update(self, user_id: str, todo_id: str, data: dict) -> ToDo:
         existing = self.todo_repo.get(user_id=user_id, todo_id=todo_id)
         if not existing:
-            raise ValueError("Not Found")
+            raise NotFoundError("Not Found")
 
         if "title" in data:
             title = data["title"]
