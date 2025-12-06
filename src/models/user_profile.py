@@ -24,7 +24,7 @@ class UserProfile:
     # ---------- Input Helpers ----------
 
     @classmethod
-    def from_event(cls, event: Dict[str, Any]) -> "UserProfile":
+    def from_event(cls, event: Dict[str, Any]) -> Dict[str, Any]:
         body_str = event.get("body", "{}")
         body = json.loads(body_str)
         return cls.from_dict(body)
@@ -85,11 +85,6 @@ class UserProfile:
             "points": data.get("points", 0),
             "level": data.get("level", 1),
         }
-
-    @classmethod
-    def from_json(cls, json_str: str) -> "UserProfile":
-        data = json.loads(json_str)
-        return cls.from_dict(data)
 
     @classmethod
     def from_dynamo(cls, item: Dict[str, Any]) -> "UserProfile":
