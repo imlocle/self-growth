@@ -1,7 +1,7 @@
 from typing import Any, Dict
 
-from models.todo import ToDo
 from models.enum import StatusEnum
+from models.todo import ToDo
 from repositories.todo_repository import ToDoRepository
 from utils.helper import generate_id, utc_now_iso
 
@@ -43,7 +43,7 @@ class ToDoService:
             if not isinstance(title, str) or not title.strip():
                 raise ValueError("Title must be a non-empty string")
         else:
-            title = existing.get("title")
+            title = existing["title"]
 
         description = data.get("description", existing.get("description"))
 
@@ -57,14 +57,14 @@ class ToDoService:
                     f"Expected one of: {[s.value for s in StatusEnum]}"
                 )
         else:
-            status = existing.get("status")
+            status = existing["status"]
 
         updated_todo = ToDo(
-            id=existing.get("id"),
+            id=existing["id"],
             title=title,
             description=description,
             status=status,
-            date_created=existing.get("date_created"),
+            date_created=existing["date_created"],
             date_modified=utc_now_iso(),
         )
         self.todo_repo.update(user_id=user_id, todo=updated_todo)

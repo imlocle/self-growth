@@ -1,5 +1,5 @@
-import json
 from typing import Any, Dict
+
 from models.habit import Habit
 from services.habit_service import HabitService
 
@@ -13,9 +13,7 @@ class HabitController:
         self.habit_service = habit_service or HabitService()
 
     def validate_data(self) -> Dict[str, Any]:
-        body_str = self.event.get("body") or "{}"
-        body = json.loads(body_str)
-        return Habit.from_dict(body)
+        return Habit.from_event(self.event)
 
     def create(self) -> Habit:
         return self.habit_service.create(self.user_id, self.data)

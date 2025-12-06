@@ -23,6 +23,7 @@ class HabitRepository:
             "Item": {
                 "pk": f"USER#{user_id}",
                 "sk": f"HABIT#{habit.id}",
+                "user_id": user_id,
                 **habit.to_dynamo(),
             }
         }
@@ -47,6 +48,7 @@ class HabitRepository:
             "Item": {
                 "pk": f"USER#{user_id}",
                 "sk": f"HABIT#{habit.id}",
+                "user_id": user_id,
                 **habit.to_dynamo(),
             }
         }

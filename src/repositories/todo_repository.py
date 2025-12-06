@@ -23,6 +23,7 @@ class ToDoRepository:
             "Item": {
                 "pk": f"USER#{user_id}",
                 "sk": f"TODO#{todo.id}",
+                "user_id": user_id,
                 **todo.to_dynamo(),
             }
         }
@@ -47,6 +48,7 @@ class ToDoRepository:
             "Item": {
                 "pk": f"USER#{user_id}",
                 "sk": f"TODO#{todo.id}",
+                "user_id": user_id,
                 **todo.to_dynamo(),
             }
         }

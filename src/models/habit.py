@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import json
 from typing import Optional, Dict, Any
 
 from models.enum import HabitTypeEnum, HabitStatusEnum
@@ -17,6 +18,12 @@ class Habit:
     status: HabitStatusEnum = HabitStatusEnum.ACTIVE
 
     # ---------- Input helpers ----------
+
+    @classmethod
+    def from_event(cls, event: Dict[str, Any]) -> Dict[str, Any]:
+        body_str = event.get("body", "{}")
+        body = json.loads(body_str)
+        return cls.from_dict(body)
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> Dict[str, Any]:
@@ -85,12 +92,4 @@ class Habit:
         }
 
     def to_dynamo(self) -> Dict[str, Any]:
-        return {
-            "id": self.id,
-            "title": self.title,
-            "description": self.description,
-            "type": self.type.value,
-            "status": self.status.value,
-            "date_created": self.date_created,
-            "date_modified": self.date_modified,
-        }
+        return self.to_dict()

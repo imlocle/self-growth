@@ -1,4 +1,3 @@
-import json
 from typing import Any, Dict
 
 from models.todo import ToDo
@@ -14,9 +13,7 @@ class ToDoController:
         self.todo_service = todo_service or ToDoService()
 
     def validate_data(self) -> Dict[str, Any]:
-        body_str = self.event.get("body") or "{}"
-        body = json.loads(body_str)
-        return ToDo.from_dict(body)
+        return ToDo.from_event(self.event)
 
     def create(self) -> ToDo:
         return self.todo_service.create(self.user_id, self.data)

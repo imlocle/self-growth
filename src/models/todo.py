@@ -19,7 +19,7 @@ class ToDo:
     # ---------- Constructors ----------
 
     @classmethod
-    def from_event(cls, event: Dict[str, Any]) -> ToDo:
+    def from_event(cls, event: Dict[str, Any]) -> Dict[str, Any]:
         body_str = event.get("body") or "{}"
         body = json.loads(body_str)
         return cls.from_dict(body)
