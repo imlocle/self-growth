@@ -1,12 +1,10 @@
-from typing import Any, Dict
-
-from controllers.todo_controller import ToDoController
+from controllers.blog_post_controller import BlogPostController
 from utils.response_util import success_response, error_response
 
 
-class CreateToDoHandler:
-    def __init__(self, event: Dict[str, Any]):
-        self.controller = ToDoController(event)
+class CreateBlogPostHandler:
+    def __init__(self, event):
+        self.controller = BlogPostController(event)
 
     def handler(self):
         try:
@@ -19,4 +17,4 @@ class CreateToDoHandler:
 
 
 def lambda_handler(event, context):
-    return CreateToDoHandler(event).handler()
+    return CreateBlogPostHandler(event).handler()

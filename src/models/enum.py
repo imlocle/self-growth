@@ -1,6 +1,12 @@
 from enum import Enum
 
 
+class BlogStatusEnum(str, Enum):
+    DRAFT = "draft"
+    PUBLISHED = "published"
+    ARCHIVED = "archived"
+
+
 class CounterOptionEnum(str, Enum):
     DAILY = "daily"
     MONTHLY = "monthly"

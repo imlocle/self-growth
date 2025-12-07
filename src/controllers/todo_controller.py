@@ -5,7 +5,7 @@ from services.todo_service import ToDoService
 
 
 class ToDoController:
-    def __init__(self, event, todo_service: ToDoService = None):
+    def __init__(self, event: Dict[str, Any], todo_service: ToDoService = None):
         self.event = event
         # Create AuthService to get user_id
         self.user_id = "1"

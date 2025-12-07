@@ -5,7 +5,7 @@ from services.habit_service import HabitService
 
 
 class HabitController:
-    def __init__(self, event, habit_service: HabitService = None):
+    def __init__(self, event: Dict[str, Any], habit_service: HabitService = None):
         self.event = event
         # Create AuthService to get user_id
         self.user_id = "1"

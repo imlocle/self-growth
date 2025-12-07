@@ -5,7 +5,9 @@ from services.user_profile_service import UserProfileService
 
 
 class UserProfileController:
-    def __init__(self, event, user_profile_service: UserProfileService = None):
+    def __init__(
+        self, event: Dict[str, Any], user_profile_service: UserProfileService = None
+    ):
         self.event = event
         # Create AuthService to get user_id
         self.user_id = "1"
