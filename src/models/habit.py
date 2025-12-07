@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import json
 from typing import Optional, Dict, Any
 
-from models.enum import HabitTypeEnum, HabitStatusEnum
+from models.enum import HabitDifficultyEnum, HabitTypeEnum, HabitStatusEnum
 
 
 @dataclass
@@ -14,8 +14,9 @@ class Habit:
     date_created: str
     date_modified: str
     description: Optional[str] = None
-    type: HabitTypeEnum = HabitTypeEnum.BUILD
+    difficulty: HabitDifficultyEnum = HabitDifficultyEnum.EASY
     status: HabitStatusEnum = HabitStatusEnum.ACTIVE
+    type: HabitTypeEnum = HabitTypeEnum.BUILD
 
     # ---------- Input helpers ----------
 
@@ -36,10 +37,8 @@ class Habit:
         if not isinstance(title, str) or not title.strip():
             raise ValueError("title is required and must be a non-empty string")
 
-        # description
         description = data.get("description")
 
-        # type
         type_raw = data.get("type", HabitTypeEnum.BUILD.value)
         try:
             habit_type = HabitTypeEnum(type_raw)
@@ -49,7 +48,6 @@ class Habit:
                 f"Expected one of: {[t.value for t in HabitTypeEnum]}"
             )
 
-        # status (allow override if you want)
         status_raw = data.get("status", HabitStatusEnum.ACTIVE.value)
         try:
             status = HabitStatusEnum(status_raw)
@@ -59,9 +57,19 @@ class Habit:
                 f"Expected one of: {[s.value for s in HabitStatusEnum]}"
             )
 
+        difficulty_raw = data.get("difficulty", HabitDifficultyEnum.EASY.value)
+        try:
+            difficulty = HabitDifficultyEnum(difficulty_raw)
+        except ValueError:
+            raise ValueError(
+                f"Invalid habit difficulty: '{difficulty_raw}'. "
+                f"Expected one of: {[s.value for s in HabitDifficultyEnum]}"
+            )
+
         return {
             "title": title,
             "description": description,
+            "difficulty": difficulty,
             "type": habit_type,
             "status": status,
         }
@@ -72,6 +80,7 @@ class Habit:
             id=item["id"],
             title=item["title"],
             description=item.get("description"),
+            difficulty=HabitDifficultyEnum(item["difficulty"]),
             type=HabitTypeEnum(item["type"]),
             status=HabitStatusEnum(item["status"]),
             date_created=item["date_created"],
@@ -85,6 +94,7 @@ class Habit:
             "id": self.id,
             "title": self.title,
             "description": self.description,
+            "difficulty": self.difficulty.value,
             "type": self.type.value,
             "status": self.status.value,
             "date_created": self.date_created,

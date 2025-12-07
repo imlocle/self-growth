@@ -9,14 +9,14 @@ class HabitController:
         self.event = event
         # Create AuthService to get user_id
         self.user_id = "1"
-        self.data = self.validate_data()
         self.habit_service = habit_service or HabitService()
 
     def validate_data(self) -> Dict[str, Any]:
         return Habit.from_event(self.event)
 
     def create(self) -> Habit:
-        return self.habit_service.create(self.user_id, self.data)
+        data = self.validate_data()
+        return self.habit_service.create(self.user_id, data)
 
     def get(self) -> Habit:
         habit_id = self._get_path_params_id()
@@ -30,9 +30,10 @@ class HabitController:
         }
 
     def update(self) -> Habit:
+        data = self.validate_data()
         habit_id = self._get_path_params_id()
         return self.habit_service.update(
-            user_id=self.user_id, habit_id=habit_id, data=self.data
+            user_id=self.user_id, habit_id=habit_id, data=data
         )
 
     def _get_path_params_id(self) -> str:

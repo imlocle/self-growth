@@ -1,0 +1,17 @@
+from controllers.habit_controller import HabitController
+from utils.response_util import error_response, success_response
+
+
+class GetAllHabitHandler:
+    def __init__(self, event):
+        self.controller = HabitController(event)
+
+    def handler(self):
+        try:
+            return success_response(body=self.controller.get_all())
+        except Exception as e:
+            return error_response(message=str(e))
+
+
+def lambda_handler(event, context):
+    return GetAllHabitHandler(event).handler()

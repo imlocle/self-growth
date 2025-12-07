@@ -1,13 +1,6 @@
 from enum import Enum
 
 
-class DifficultyLevelEnum(str, Enum):
-    EASY = "easy"
-    HARD = "hard"
-    MEDIUM = "medium"
-    TRIVIAL = "trivial"
-
-
 class CounterOptionEnum(str, Enum):
     DAILY = "daily"
     MONTHLY = "monthly"
@@ -21,6 +14,18 @@ class StatusEnum(str, Enum):
     COMPLETED = "completed"
 
 
+class HabitDifficultyEnum(str, Enum):
+    EASY = "easy"
+    HARD = "hard"
+    MEDIUM = "medium"
+    TRIVIAL = "trivial"
+
+
+class HabitStatusEnum(str, Enum):
+    ACTIVE = "active"
+    ARCHIVED = "archived"
+
+
 class HabitTypeEnum(str, Enum):
     BUILD = "build"
     QUIT = "quit"
@@ -29,11 +34,6 @@ class HabitTypeEnum(str, Enum):
 class HabitEventTypeEnum(str, Enum):
     SUCCESS = "success"
     RESET = "reset"
-
-
-class HabitStatusEnum(str, Enum):
-    ACTIVE = "active"
-    ARCHIVED = "archived"
 
 
 class VisibilityEnum(str, Enum):

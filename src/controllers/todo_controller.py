@@ -9,14 +9,14 @@ class ToDoController:
         self.event = event
         # Create AuthService to get user_id
         self.user_id = "1"
-        self.data = self.validate_data()
         self.todo_service = todo_service or ToDoService()
 
     def validate_data(self) -> Dict[str, Any]:
         return ToDo.from_event(self.event)
 
     def create(self) -> ToDo:
-        return self.todo_service.create(self.user_id, self.data)
+        data = self.validate_data()
+        return self.todo_service.create(self.user_id, data)
 
     def get(self) -> ToDo:
         todo_id = self._get_path_params_id()
@@ -30,9 +30,10 @@ class ToDoController:
         }
 
     def update(self) -> ToDo:
+        data = self.validate_data()
         todo_id = self._get_path_params_id()
         return self.todo_service.update(
-            user_id=self.user_id, todo_id=todo_id, data=self.data
+            user_id=self.user_id, todo_id=todo_id, data=data
         )
 
     def _get_path_params_id(self) -> str:
