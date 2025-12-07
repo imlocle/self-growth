@@ -80,7 +80,7 @@ class Habit:
             id=item["id"],
             title=item["title"],
             description=item.get("description"),
-            difficulty=HabitDifficultyEnum(item["difficulty"]),
+            difficulty=HabitDifficultyEnum(item.get("difficulty", "easy")),
             type=HabitTypeEnum(item["type"]),
             status=HabitStatusEnum(item["status"]),
             date_created=item["date_created"],
