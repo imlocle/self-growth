@@ -5,6 +5,7 @@ import json
 from typing import Optional, Dict, Any
 
 from models.enum import HabitDifficultyEnum, HabitTypeEnum, HabitStatusEnum
+from utils.helper import dict_keys_to_snake_case
 
 
 @dataclass
@@ -22,8 +23,8 @@ class Habit:
 
     @classmethod
     def from_event(cls, event: Dict[str, Any]) -> Dict[str, Any]:
-        body_str = event.get("body", "{}")
-        body = json.loads(body_str)
+        body = json.loads(event.get("body", "{}"))
+        body = dict_keys_to_snake_case(body)
         return cls.from_dict(body)
 
     @classmethod

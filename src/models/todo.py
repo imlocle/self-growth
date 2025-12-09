@@ -5,6 +5,7 @@ import json
 from typing import Any, Dict, Optional
 
 from models.enum import StatusEnum
+from utils.helper import dict_keys_to_snake_case
 
 
 @dataclass
@@ -13,6 +14,7 @@ class ToDo:
     title: str
     date_created: str
     date_modified: str
+    date_due: Optional[str] = None
     description: Optional[str] = None
     status: StatusEnum = StatusEnum.NEW
 
@@ -20,8 +22,8 @@ class ToDo:
 
     @classmethod
     def from_event(cls, event: Dict[str, Any]) -> Dict[str, Any]:
-        body_str = event.get("body") or "{}"
-        body = json.loads(body_str)
+        body = json.loads(event.get("body", "{}"))
+        body = dict_keys_to_snake_case(body)
         return cls.from_dict(body)
 
     @classmethod
@@ -48,6 +50,7 @@ class ToDo:
             "title": title,
             "description": data.get("description"),
             "status": status,
+            "date_due": data.get("date_due"),
         }
 
     @classmethod
@@ -60,6 +63,7 @@ class ToDo:
             title=item["title"],
             description=item.get("description"),
             status=StatusEnum(item["status"]),
+            date_due=item.get("date_due"),
             date_created=item["date_created"],
             date_modified=item["date_modified"],
         )
@@ -75,6 +79,7 @@ class ToDo:
             "title": self.title,
             "description": self.description,
             "status": self.status.value,
+            "date_due": self.date_due,
             "date_created": self.date_created,
             "date_modified": self.date_modified,
         }

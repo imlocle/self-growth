@@ -70,3 +70,6 @@ class ToDoService:
         )
         self.todo_repo.update(user_id=user_id, todo=updated_todo)
         return updated_todo
+
+    def delete(self, user_id: str, todo_id: str) -> None:
+        self.todo_repo.delete(user_id, todo_id)

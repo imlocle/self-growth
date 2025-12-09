@@ -5,6 +5,7 @@ from mypy_boto3_dynamodb.type_defs import (
     PutItemInputTablePutItemTypeDef,
     GetItemInputTableGetItemTypeDef,
     QueryInputTableQueryTypeDef,
+    DeleteItemInputTableDeleteItemTypeDef,
 )
 
 from aws.dynamodb_service import DynamodbService
@@ -53,3 +54,9 @@ class ToDoRepository:
             }
         }
         self.dynamodb_service.put(put_params)
+
+    def delete(self, user_id: str, todo_id: str) -> Dict:
+        delete_params: DeleteItemInputTableDeleteItemTypeDef = {
+            "Key": {"pk": f"USER#{user_id}", "sk": f"TODO#{todo_id}"}
+        }
+        return self.dynamodb_service.delete(delete_params)

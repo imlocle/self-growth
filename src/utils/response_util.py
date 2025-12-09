@@ -1,5 +1,7 @@
 import json
 
+from utils.helper import dict_keys_to_camel_case
+
 
 def get_headers() -> dict[str, str]:
     return {
@@ -11,6 +13,7 @@ def get_headers() -> dict[str, str]:
 
 
 def success_response(body: dict, status_code: int = 200):
+    body = dict_keys_to_camel_case(body)
     return {
         "statusCode": status_code,
         "body": json.dumps(body),

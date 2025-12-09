@@ -36,5 +36,9 @@ class ToDoController:
             user_id=self.user_id, todo_id=todo_id, data=data
         )
 
+    def delete(self) -> None:
+        todo_id = self._get_path_params_id()
+        return self.todo_service.delete(self.user_id, todo_id)
+
     def _get_path_params_id(self) -> str:
         return self.event.get("pathParameters", {}).get("todoId")
