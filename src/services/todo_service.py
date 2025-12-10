@@ -1,10 +1,10 @@
 from typing import Any, Dict
 
-from models.enum import StatusEnum
+from models.enum import ToDoStatusEnum
 from models.todo import ToDo
 from repositories.todo_repository import ToDoRepository
 from utils.error_util import NotFoundError
-from utils.helper import generate_id, utc_now_iso
+from utils.helper import generate_id, parse_enum, parse_iso, utc_now_iso
 
 
 class ToDoService:
@@ -27,10 +27,22 @@ class ToDoService:
             raise NotFoundError("Not Found")
         return ToDo.from_dynamo(item)
 
-    def get_all(self, user_id: str) -> Dict[str, Any]:
+    def get_all(self, user_id: str, sort_by: str = "date_modifed") -> Dict[str, Any]:
         response = self.todo_repo.get_all(user_id)
+        items = [ToDo.from_dynamo(i) for i in response.get("items")]
+
+        if sort_by == "date_due":
+            items.sort(
+                key=lambda t: (
+                    t.date_due is None,
+                    parse_iso(t.date_due or t.date_modified),
+                )
+            )
+        else:
+            items.sort(key=lambda t: parse_iso(t.date_modified))
+
         return {
-            "items": [ToDo.from_dynamo(i) for i in response.get("items")],
+            "items": items,
             "lastEvaluatedKey": response.get("lastEvaluatedKey"),
         }
 
@@ -49,16 +61,9 @@ class ToDoService:
         description = data.get("description", existing.get("description"))
 
         if "status" in data:
-            status_raw = data["status"]
-            try:
-                status = StatusEnum(status_raw)
-            except ValueError:
-                raise ValueError(
-                    f"Invalid status: '{status_raw}'. "
-                    f"Expected one of: {[s.value for s in StatusEnum]}"
-                )
+            status = parse_enum(ToDoStatusEnum, data["status"])
         else:
-            status = existing["status"]
+            status = ToDoStatusEnum(existing["status"])
 
         updated_todo = ToDo(
             id=existing["id"],
@@ -72,4 +77,16 @@ class ToDoService:
         return updated_todo
 
     def delete(self, user_id: str, todo_id: str) -> None:
-        self.todo_repo.delete(user_id, todo_id)
+        existing = self.todo_repo.get(user_id=user_id, todo_id=todo_id)
+        if not existing:
+            raise NotFoundError("Not Found")
+
+        deleted_todo = ToDo(
+            id=existing["id"],
+            title=existing["title"],
+            description=existing["description"],
+            status=ToDoStatusEnum.DELETED,
+            date_created=existing["date_created"],
+            date_modified=utc_now_iso(),
+        )
+        self.todo_repo.update(user_id=user_id, todo=deleted_todo)

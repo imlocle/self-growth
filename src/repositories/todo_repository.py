@@ -14,9 +14,8 @@ from models.todo import ToDo
 
 class ToDoRepository:
     def __init__(self, dynamodb_service: DynamodbService = None):
-        self.table_name = os.getenv("SELF_GROWTH_TABLE")
         self.dynamodb_service = dynamodb_service or DynamodbService(
-            table_name=self.table_name
+            table_name=os.getenv("SELF_GROWTH_TABLE")
         )
 
     def create(self, user_id: str, todo: ToDo) -> None:
@@ -37,10 +36,17 @@ class ToDoRepository:
         return self.dynamodb_service.get(get_params)
 
     def get_all(self, user_id: str) -> Dict:
+        # TODO Think about querying by status
         query_params: QueryInputTableQueryTypeDef = {
             "KeyConditionExpression": "#pk = :pk AND begins_with(#sk, :sk)",
+            # "FilterExpression": "#status = :deleted",
             "ExpressionAttributeNames": {"#pk": "pk", "#sk": "sk"},
-            "ExpressionAttributeValues": {":pk": f"USER#{user_id}", ":sk": f"TODO#"},
+            #   "#status": "status"},
+            "ExpressionAttributeValues": {
+                ":pk": f"USER#{user_id}",
+                ":sk": f"TODO#",
+                # ":deleted": "deleted",
+            },
         }
         return self.dynamodb_service.query(query_params)
 

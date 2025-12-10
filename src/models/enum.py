@@ -7,24 +7,22 @@ class BlogStatusEnum(str, Enum):
     ARCHIVED = "archived"
 
 
-class CounterOptionEnum(str, Enum):
-    DAILY = "daily"
-    MONTHLY = "monthly"
-    WEEKLY = "weekly"
+class BlogVisibilityEnum(str, Enum):
+    PRIVATE = "private"
+    PUBLIC = "public"
 
 
-class StatusEnum(str, Enum):
-    ACTIVE = "active"
-    DELETED = "deleted"
-    NEW = "new"
-    COMPLETED = "completed"
-
-
-class HabitDifficultyEnum(str, Enum):
+class DifficultyEnum(str, Enum):
     EASY = "easy"
     HARD = "hard"
     MEDIUM = "medium"
     TRIVIAL = "trivial"
+
+
+class HabitCounterEnum(str, Enum):
+    DAILY = "daily"
+    MONTHLY = "monthly"
+    WEEKLY = "weekly"
 
 
 class HabitStatusEnum(str, Enum):
@@ -42,6 +40,7 @@ class HabitEventTypeEnum(str, Enum):
     RESET = "reset"
 
 
-class VisibilityEnum(str, Enum):
-    PRIVATE = "private"
-    PUBLIC = "public"
+class ToDoStatusEnum(str, Enum):
+    ACTIVE = "active"
+    DELETED = "deleted"
+    COMPLETED = "completed"

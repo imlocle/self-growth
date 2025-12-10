@@ -1,91 +1,82 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-import json
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
-from models.enum import StatusEnum
-from utils.helper import dict_keys_to_snake_case
+from models.enum import DifficultyEnum, ToDoStatusEnum
+from models.base_model import BaseModel
+from utils.helper import parse_enum
 
 
 @dataclass
-class ToDo:
+class ToDo(BaseModel):
     id: str
     title: str
     date_created: str
     date_modified: str
+
+    checklist: Optional[List[str]] = None
     date_due: Optional[str] = None
     description: Optional[str] = None
-    status: StatusEnum = StatusEnum.NEW
-
-    # ---------- Constructors ----------
-
-    @classmethod
-    def from_event(cls, event: Dict[str, Any]) -> Dict[str, Any]:
-        body = json.loads(event.get("body", "{}"))
-        body = dict_keys_to_snake_case(body)
-        return cls.from_dict(body)
+    difficulty: DifficultyEnum = DifficultyEnum.EASY
+    status: ToDoStatusEnum = ToDoStatusEnum.ACTIVE
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Convert a raw dict into a coherent ToDo *input* dict.
-        Does NOT assign id or timestamps — service layer does that.
+        Validate and normalize incoming todo data.
+        Returns a dict with parsed fields.
+        Service assigns id + timestamps.
         """
+
         title = data.get("title")
         if not isinstance(title, str) or not title.strip():
-            raise ValueError("Title is required and must be a non-empty string")
+            raise ValueError("title is required and must be a non-empty string")
 
-        # Handle status
-        status_raw = data.get("status", StatusEnum.NEW.value)
-        try:
-            status = StatusEnum(status_raw)
-        except ValueError:
-            raise ValueError(
-                f"Invalid status: '{status_raw}'. "
-                f"Expected one of: {[s.value for s in StatusEnum]}"
-            )
+        difficulty: DifficultyEnum = parse_enum(
+            DifficultyEnum, data.get("difficulty", DifficultyEnum.EASY.value)
+        )
+        status: ToDoStatusEnum = parse_enum(
+            ToDoStatusEnum, data.get("status", ToDoStatusEnum.ACTIVE.value)
+        )
 
         return {
-            "title": title,
+            "title": title.strip(),
+            "checklist": data.get("checklist"),
             "description": data.get("description"),
+            "difficulty": difficulty,
             "status": status,
             "date_due": data.get("date_due"),
         }
 
     @classmethod
-    def from_dynamo(cls, item: Dict[str, Any]) -> ToDo:
+    def from_dynamo(cls, item: Dict[str, Any]) -> "ToDo":
         """
-        Build a ToDo from a DynamoDB item.
+        Convert a DynamoDB item to a ToDo instance.
         """
         return cls(
             id=item["id"],
             title=item["title"],
+            checklist=item.get("checklist"),
             description=item.get("description"),
-            status=StatusEnum(item["status"]),
+            difficulty=DifficultyEnum(
+                item.get("difficulty", DifficultyEnum.EASY.value)
+            ),
+            status=ToDoStatusEnum(item["status"]),
             date_due=item.get("date_due"),
             date_created=item["date_created"],
             date_modified=item["date_modified"],
         )
 
-    # ---------- Output Methods ----------
-
     def to_dict(self) -> Dict[str, Any]:
-        """
-        Convert to a JSON-safe dict for API responses.
-        """
         return {
             "id": self.id,
             "title": self.title,
+            "checklist": self.checklist,
             "description": self.description,
+            "difficulty": self.difficulty.value,
             "status": self.status.value,
             "date_due": self.date_due,
             "date_created": self.date_created,
             "date_modified": self.date_modified,
         }
-
-    def to_dynamo(self) -> Dict[str, Any]:
-        """
-        Convert to a DynamoDB item dict.
-        """
-        return self.to_dict()
