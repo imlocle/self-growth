@@ -25,6 +25,7 @@ class ToDoService:
         item = self.todo_repo.get(user_id, todo_id)
         if not item:
             raise NotFoundError("Not Found")
+
         return ToDo.from_dynamo(item)
 
     def get_all(self, user_id: str, sort_by: str = "date_modifed") -> Dict[str, Any]:
