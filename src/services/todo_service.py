@@ -3,7 +3,7 @@ from typing import Any, Dict
 from models.enum import DifficultyEnum, ToDoStatusEnum
 from models.todo import ToDo
 from repositories.todo_repository import ToDoRepository
-from utils.error_util import NotFoundError
+from utils.errors import NotFoundError
 from utils.helper import generate_id, parse_enum, parse_iso, utc_now_iso
 
 

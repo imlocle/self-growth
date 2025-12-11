@@ -3,7 +3,7 @@ from typing import Any, Dict
 from models.enum import HabitStatusEnum, HabitTypeEnum
 from models.habit import Habit
 from repositories.habit_repository import HabitRepository
-from utils.error_util import NotFoundError
+from utils.errors import NotFoundError
 from utils.helper import generate_id, parse_enum, utc_now_iso
 
 

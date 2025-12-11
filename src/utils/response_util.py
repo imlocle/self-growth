@@ -21,7 +21,7 @@ def success_response(body: dict, status_code: int = 200):
 
 
 def error_response(
-    message: str,
+    message: str = "Internal server error",
     status_code: int = 500,
 ):
     return {
