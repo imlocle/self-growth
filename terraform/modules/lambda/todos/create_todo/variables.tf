@@ -29,3 +29,7 @@ variable "api_id" {
 variable "api_execution_arn" {
   type = string
 }
+
+variable "authorizer_id" {
+  type = string
+}

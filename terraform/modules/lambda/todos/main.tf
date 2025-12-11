@@ -8,6 +8,7 @@ module "create_todo" {
   self_growth_table_id  = var.self_growth_table_id
   api_execution_arn     = var.api_execution_arn
   api_id                = var.api_id
+  authorizer_id         = var.authorizer_id
 }
 
 module "get_todo" {
@@ -20,6 +21,7 @@ module "get_todo" {
   self_growth_table_id  = var.self_growth_table_id
   api_execution_arn     = var.api_execution_arn
   api_id                = var.api_id
+  authorizer_id         = var.authorizer_id
 }
 
 module "get_all_todo" {
@@ -32,6 +34,7 @@ module "get_all_todo" {
   self_growth_table_id  = var.self_growth_table_id
   api_execution_arn     = var.api_execution_arn
   api_id                = var.api_id
+  authorizer_id         = var.authorizer_id
 }
 
 module "update_todo" {
@@ -44,6 +47,7 @@ module "update_todo" {
   self_growth_table_id  = var.self_growth_table_id
   api_execution_arn     = var.api_execution_arn
   api_id                = var.api_id
+  authorizer_id         = var.authorizer_id
 }
 
 module "delete_todo" {
@@ -56,4 +60,5 @@ module "delete_todo" {
   self_growth_table_id  = var.self_growth_table_id
   api_execution_arn     = var.api_execution_arn
   api_id                = var.api_id
+  authorizer_id         = var.authorizer_id
 }

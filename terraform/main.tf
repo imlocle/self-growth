@@ -13,6 +13,12 @@ provider "aws" {
   region = var.aws_region
 }
 
+module "cognito" {
+  source       = "./modules/cognito"
+  environment  = var.environment
+  project_name = var.project_name
+}
+
 module "dynamodb" {
   source       = "./modules/dynamodb"
   environment  = var.environment
@@ -20,9 +26,12 @@ module "dynamodb" {
 }
 
 module "api" {
-  source       = "./modules/api"
-  environment  = var.environment
-  project_name = var.project_name
+  source                      = "./modules/api"
+  environment                 = var.environment
+  project_name                = var.project_name
+  aws_region                  = var.aws_region
+  cognito_user_pool_client_id = module.cognito.cognito_user_pool_client_id
+  cognito_user_pool_id        = module.cognito.cognito_user_pool_id
 }
 
 module "lambda" {
@@ -34,4 +43,5 @@ module "lambda" {
   api_execution_arn     = module.api.self_growth_api_execution_arn
   api_id                = module.api.self_growth_api_id
   runtime               = var.runtime
+  authorizer_id         = module.api.authorizer_id
 }

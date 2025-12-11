@@ -9,3 +9,7 @@ output "self_growth_api_execution_arn" {
 output "self_growth_api_endpoint" {
   value = module.self_growth_api.api_endpoint
 }
+
+output "authorizer_id" {
+  value = module.self_growth_api.authorizer_id
+}

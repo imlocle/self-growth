@@ -2,14 +2,14 @@ from typing import Any, Dict
 
 from models.todo import ToDo
 from services.todo_service import ToDoService
+from services.auth_service import AuthService
 from utils.helper import parse_request_body
 
 
 class ToDoController:
     def __init__(self, event: Dict[str, Any], todo_service: ToDoService = None):
         self.event = event
-        # Create AuthService to get user_id
-        self.user_id = "1"
+        self.user_id = AuthService.get_user_id_from_event(event)
         self.todo_service = todo_service or ToDoService()
 
     def create(self) -> ToDo:

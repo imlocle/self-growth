@@ -1,18 +1,18 @@
 from models.enum import ToDoStatusEnum
 from models.user_profile import UserProfile
 from repositories.user_profile_repository import UserProfileRepository
-from utils.helper import generate_id, utc_now_iso
+from utils.helper import utc_now_iso
 
 
 class UserProfileService:
     def __init__(self, user_profile_repo: UserProfileRepository = None):
         self.user_profile_repo = user_profile_repo or UserProfileRepository()
 
-    def create(self, data: dict) -> UserProfile:
+    def create(self, user_id: str, data: dict) -> UserProfile:
         timestamp = utc_now_iso()
 
         user_profile = UserProfile(
-            id=generate_id(), date_created=timestamp, date_modified=timestamp, **data
+            id=user_id, date_created=timestamp, date_modified=timestamp, **data
         )
         self.user_profile_repo.create(user_profile)
 

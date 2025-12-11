@@ -133,6 +133,9 @@ resource "aws_apigatewayv2_route" "this" {
   api_id    = var.api_id
   route_key = "GET /todo/{todoId}"
   target    = "integrations/${aws_apigatewayv2_integration.this.id}"
+
+  authorization_type = "JWT"
+  authorizer_id      = var.authorizer_id
 }
 
 #####################################
