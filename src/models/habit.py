@@ -1,74 +1,62 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-import json
 from typing import Optional, Dict, Any
 
-from models.enum import HabitDifficultyEnum, HabitTypeEnum, HabitStatusEnum
-from utils.helper import dict_keys_to_snake_case
+from models.base_model import BaseModel
+from models.enum import (
+    HabitCounterEnum,
+    DifficultyEnum,
+    HabitTypeEnum,
+    HabitStatusEnum,
+)
+from utils.helper import parse_enum
 
 
 @dataclass
-class Habit:
+class Habit(BaseModel):
     id: str
     title: str
     date_created: str
     date_modified: str
+
+    counter: HabitCounterEnum = HabitCounterEnum.DAILY
     description: Optional[str] = None
-    difficulty: HabitDifficultyEnum = HabitDifficultyEnum.EASY
+    difficulty: DifficultyEnum = DifficultyEnum.EASY
     status: HabitStatusEnum = HabitStatusEnum.ACTIVE
     type: HabitTypeEnum = HabitTypeEnum.BUILD
-
-    # ---------- Input helpers ----------
-
-    @classmethod
-    def from_event(cls, event: Dict[str, Any]) -> Dict[str, Any]:
-        body = json.loads(event.get("body", "{}"))
-        body = dict_keys_to_snake_case(body)
-        return cls.from_dict(body)
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Validate and normalize incoming habit data.
-        Does NOT assign id or timestamps - that's service responsibility.
         Returns a dict with parsed fields.
+        Service assigns id + timestamps.
         """
+
         title = data.get("title")
         if not isinstance(title, str) or not title.strip():
             raise ValueError("title is required and must be a non-empty string")
 
+        counter: HabitCounterEnum = parse_enum(
+            HabitCounterEnum, data.get("counter", HabitCounterEnum.DAILY.value)
+        )
+
         description = data.get("description")
 
-        type_raw = data.get("type", HabitTypeEnum.BUILD.value)
-        try:
-            habit_type = HabitTypeEnum(type_raw)
-        except ValueError:
-            raise ValueError(
-                f"Invalid habit type: '{type_raw}'. "
-                f"Expected one of: {[t.value for t in HabitTypeEnum]}"
-            )
-
-        status_raw = data.get("status", HabitStatusEnum.ACTIVE.value)
-        try:
-            status = HabitStatusEnum(status_raw)
-        except ValueError:
-            raise ValueError(
-                f"Invalid habit status: '{status_raw}'. "
-                f"Expected one of: {[s.value for s in HabitStatusEnum]}"
-            )
-
-        difficulty_raw = data.get("difficulty", HabitDifficultyEnum.EASY.value)
-        try:
-            difficulty = HabitDifficultyEnum(difficulty_raw)
-        except ValueError:
-            raise ValueError(
-                f"Invalid habit difficulty: '{difficulty_raw}'. "
-                f"Expected one of: {[s.value for s in HabitDifficultyEnum]}"
-            )
+        difficulty: DifficultyEnum = parse_enum(
+            DifficultyEnum, data.get("difficulty", DifficultyEnum.EASY.value)
+        )
+        habit_type: HabitTypeEnum = parse_enum(
+            HabitTypeEnum, data.get("type", HabitTypeEnum.BUILD.value)
+        )
+        status: HabitStatusEnum = parse_enum(
+            HabitStatusEnum, data.get("status", HabitStatusEnum.ACTIVE.value)
+        )
 
         return {
-            "title": title,
+            "title": title.strip(),
+            "counter": counter,
             "description": description,
             "difficulty": difficulty,
             "type": habit_type,
@@ -77,30 +65,32 @@ class Habit:
 
     @classmethod
     def from_dynamo(cls, item: Dict[str, Any]) -> "Habit":
+        """
+        Convert a DynamoDB item to a Habit instance.
+        """
         return cls(
             id=item["id"],
             title=item["title"],
             description=item.get("description"),
-            difficulty=HabitDifficultyEnum(item.get("difficulty", "easy")),
+            counter=HabitCounterEnum(item.get("counter", HabitCounterEnum.DAILY.value)),
+            difficulty=DifficultyEnum(
+                item.get("difficulty", DifficultyEnum.EASY.value)
+            ),
             type=HabitTypeEnum(item["type"]),
             status=HabitStatusEnum(item["status"]),
             date_created=item["date_created"],
             date_modified=item["date_modified"],
         )
 
-    # ---------- Output helpers ----------
-
     def to_dict(self) -> Dict[str, Any]:
         return {
             "id": self.id,
             "title": self.title,
             "description": self.description,
+            "counter": self.counter.value,
             "difficulty": self.difficulty.value,
-            "type": self.type.value,
             "status": self.status.value,
+            "type": self.type.value,
             "date_created": self.date_created,
             "date_modified": self.date_modified,
         }
-
-    def to_dynamo(self) -> Dict[str, Any]:
-        return self.to_dict()

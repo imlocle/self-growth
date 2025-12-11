@@ -33,6 +33,14 @@ class ToDo(BaseModel):
         if not isinstance(title, str) or not title.strip():
             raise ValueError("title is required and must be a non-empty string")
 
+        checklist = data.get("checklist")
+        if checklist is not None:
+            if not isinstance(checklist, list):
+                raise ValueError("checklist must be a list of strings")
+
+            if not all(isinstance(item, str) and item.strip() for item in checklist):
+                raise ValueError("checklist must contain only non-empty strings")
+
         difficulty: DifficultyEnum = parse_enum(
             DifficultyEnum, data.get("difficulty", DifficultyEnum.EASY.value)
         )
@@ -42,7 +50,7 @@ class ToDo(BaseModel):
 
         return {
             "title": title.strip(),
-            "checklist": data.get("checklist"),
+            "checklist": checklist,
             "description": data.get("description"),
             "difficulty": difficulty,
             "status": status,

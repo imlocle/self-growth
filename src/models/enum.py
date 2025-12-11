@@ -28,6 +28,7 @@ class HabitCounterEnum(str, Enum):
 class HabitStatusEnum(str, Enum):
     ACTIVE = "active"
     ARCHIVED = "archived"
+    DELETED = "deleted"
 
 
 class HabitTypeEnum(str, Enum):
@@ -42,5 +43,5 @@ class HabitEventTypeEnum(str, Enum):
 
 class ToDoStatusEnum(str, Enum):
     ACTIVE = "active"
-    DELETED = "deleted"
     COMPLETED = "completed"
+    DELETED = "deleted"

@@ -47,7 +47,8 @@ resource "aws_iam_role_policy" "lambda_policy" {
       {
         Effect = "Allow",
         Action = [
-          "dynamodb:DeleteItem"
+          "dynamodb:GetItem",
+          "dynamodb:PutItem"
         ],
         Resource = [
           "${var.self_growth_table_arn}",

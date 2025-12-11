@@ -13,9 +13,8 @@ from models.habit import Habit
 
 class HabitRepository:
     def __init__(self, dynamodb_service: DynamodbService = None):
-        self.table_name = os.getenv("SELF_GROWTH_TABLE")
         self.dynamodb_service = dynamodb_service or DynamodbService(
-            table_name=self.table_name
+            table_name=os.getenv("SELF_GROWTH_TABLE")
         )
 
     def create(self, user_id: str, habit: Habit) -> None:

@@ -4,7 +4,7 @@ from models.enum import HabitStatusEnum, HabitTypeEnum
 from models.habit import Habit
 from repositories.habit_repository import HabitRepository
 from utils.error_util import NotFoundError
-from utils.helper import generate_id, utc_now_iso
+from utils.helper import generate_id, parse_enum, utc_now_iso
 
 
 class HabitService:
@@ -12,14 +12,13 @@ class HabitService:
         self.habit_repo = habit_repo or HabitRepository()
 
     def create(self, user_id: str, data: dict) -> Habit:
-        parsed = Habit.from_dict(data)
-
         timestamp = utc_now_iso()
 
         habit = Habit(
-            id=generate_id(), date_created=timestamp, date_modified=timestamp, **parsed
+            id=generate_id(), date_created=timestamp, date_modified=timestamp, **data
         )
         self.habit_repo.create(user_id, habit)
+
         return habit
 
     def get(self, user_id: str, habit_id: str) -> Habit:
@@ -36,51 +35,39 @@ class HabitService:
         }
 
     def update(self, user_id: str, habit_id: str, data: dict) -> Habit:
-        existing = self.habit_repo.get(user_id=user_id, habit_id=habit_id)
-        if not existing:
-            raise NotFoundError("Not Found")
+        habit = self.get(user_id=user_id, habit_id=habit_id)
 
         if "title" in data:
             title = data["title"]
             if not isinstance(title, str) or not title.strip():
-                raise ValueError("Title must be a non-empty string")
+                raise ValueError("title must be a non-empty string")
         else:
-            title = existing["title"]
+            title = habit.title
 
-        description = data.get("description", existing.get("description"))
+        description = data.get("description", habit.description)
 
         if "type" in data:
-            type_raw = data["type"]
-            try:
-                habit_type = HabitTypeEnum(type_raw)
-            except ValueError:
-                raise ValueError(
-                    f"Invalid status: '{type_raw}'. "
-                    f"Expected one of: {[s.value for s in HabitTypeEnum]}"
-                )
+            habit_type = parse_enum(HabitTypeEnum, data["type"])
         else:
-            habit_type = existing["type"]
+            habit_type = habit.type
 
         if "status" in data:
-            status_raw = data["status"]
-            try:
-                status = HabitStatusEnum(status_raw)
-            except ValueError:
-                raise ValueError(
-                    f"Invalid status: '{status_raw}'. "
-                    f"Expected one of: {[s.value for s in HabitStatusEnum]}"
-                )
+            status = parse_enum(HabitStatusEnum, data["status"])
         else:
-            status = existing["status"]
+            status = habit.status
 
-        updated_habit = Habit(
-            id=existing["id"],
-            title=title,
-            description=description,
-            type=habit_type,
-            status=status,
-            date_created=existing["date_created"],
-            date_modified=utc_now_iso(),
-        )
-        self.habit_repo.update(user_id=user_id, habit=updated_habit)
-        return updated_habit
+        habit.title = title
+        habit.description = description
+        habit.type = habit_type
+        habit.status = status
+        habit.date_modified = utc_now_iso()
+
+        self.habit_repo.update(user_id=user_id, habit=habit)
+        return habit
+
+    def delete(self, user_id: str, habit_id: str) -> None:
+        habit = self.get(user_id=user_id, habit_id=habit_id)
+        habit.status = HabitStatusEnum.DELETED
+        habit.date_modified = utc_now_iso()
+
+        self.habit_repo.update(user_id=user_id, habit=habit)

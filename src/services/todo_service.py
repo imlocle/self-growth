@@ -1,6 +1,6 @@
 from typing import Any, Dict
 
-from models.enum import ToDoStatusEnum
+from models.enum import DifficultyEnum, ToDoStatusEnum
 from models.todo import ToDo
 from repositories.todo_repository import ToDoRepository
 from utils.error_util import NotFoundError
@@ -47,46 +47,49 @@ class ToDoService:
         }
 
     def update(self, user_id: str, todo_id: str, data: dict) -> ToDo:
-        existing = self.todo_repo.get(user_id=user_id, todo_id=todo_id)
-        if not existing:
-            raise NotFoundError("Not Found")
+        todo = self.get(user_id=user_id, todo_id=todo_id)
 
         if "title" in data:
             title = data["title"]
             if not isinstance(title, str) or not title.strip():
-                raise ValueError("Title must be a non-empty string")
+                raise ValueError("title must be a non-empty string")
         else:
-            title = existing["title"]
+            title = todo.title
 
-        description = data.get("description", existing.get("description"))
+        if "checklist" in data:
+            checklist = data["checklist"]
+            if not isinstance(checklist, list):
+                raise ValueError("checklist must be a list of strings")
+            if not all(isinstance(item, str) and item.strip() for item in checklist):
+                raise ValueError("checklist must contain only non-empty strings")
+        else:
+            checklist = todo.checklist
+
+        description = data.get("description", todo.description)
+
+        if "difficulty" in data:
+            difficulty = parse_enum(DifficultyEnum, data["difficulty"])
+        else:
+            difficulty = todo.difficulty
 
         if "status" in data:
             status = parse_enum(ToDoStatusEnum, data["status"])
         else:
-            status = ToDoStatusEnum(existing["status"])
+            status = todo.status
 
-        updated_todo = ToDo(
-            id=existing["id"],
-            title=title,
-            description=description,
-            status=status,
-            date_created=existing["date_created"],
-            date_modified=utc_now_iso(),
-        )
-        self.todo_repo.update(user_id=user_id, todo=updated_todo)
-        return updated_todo
+        todo.title = title
+        todo.checklist = checklist
+        todo.description = description
+        todo.difficulty = difficulty
+        todo.status = status
+        todo.date_modified = utc_now_iso()
+
+        self.todo_repo.update(user_id=user_id, todo=todo)
+        return todo
 
     def delete(self, user_id: str, todo_id: str) -> None:
-        existing = self.todo_repo.get(user_id=user_id, todo_id=todo_id)
-        if not existing:
-            raise NotFoundError("Not Found")
+        todo = self.get(user_id=user_id, todo_id=todo_id)
+        todo.status = ToDoStatusEnum.DELETED
+        todo.date_modified = utc_now_iso()
 
-        deleted_todo = ToDo(
-            id=existing["id"],
-            title=existing["title"],
-            description=existing["description"],
-            status=ToDoStatusEnum.DELETED,
-            date_created=existing["date_created"],
-            date_modified=utc_now_iso(),
-        )
-        self.todo_repo.update(user_id=user_id, todo=deleted_todo)
+        self.todo_repo.update(user_id=user_id, todo=todo)
