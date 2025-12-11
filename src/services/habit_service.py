@@ -41,26 +41,15 @@ class HabitService:
             title = data["title"]
             if not isinstance(title, str) or not title.strip():
                 raise ValueError("title must be a non-empty string")
-        else:
-            title = habit.title
+            habit.title = title
 
-        description = data.get("description", habit.description)
+        habit.description = data.get("description", habit.description)
 
         if "type" in data:
-            habit_type = parse_enum(HabitTypeEnum, data["type"])
-        else:
-            habit_type = habit.type
+            habit.type = parse_enum(HabitTypeEnum, data["type"])
 
         if "status" in data:
-            status = parse_enum(HabitStatusEnum, data["status"])
-        else:
-            status = habit.status
-
-        habit.title = title
-        habit.description = description
-        habit.type = habit_type
-        habit.status = status
-        habit.date_modified = utc_now_iso()
+            habit.status = parse_enum(HabitStatusEnum, data["status"])
 
         self.habit_repo.update(user_id=user_id, habit=habit)
         return habit
@@ -68,6 +57,5 @@ class HabitService:
     def delete(self, user_id: str, habit_id: str) -> None:
         habit = self.get(user_id=user_id, habit_id=habit_id)
         habit.status = HabitStatusEnum.DELETED
-        habit.date_modified = utc_now_iso()
 
         self.habit_repo.update(user_id=user_id, habit=habit)

@@ -53,8 +53,7 @@ class ToDoService:
             title = data["title"]
             if not isinstance(title, str) or not title.strip():
                 raise ValueError("title must be a non-empty string")
-        else:
-            title = todo.title
+            todo.title = title
 
         if "checklist" in data:
             checklist = data["checklist"]
@@ -62,27 +61,15 @@ class ToDoService:
                 raise ValueError("checklist must be a list of strings")
             if not all(isinstance(item, str) and item.strip() for item in checklist):
                 raise ValueError("checklist must contain only non-empty strings")
-        else:
-            checklist = todo.checklist
+            todo.checklist = checklist
 
-        description = data.get("description", todo.description)
+        todo.description = data.get("description", todo.description)
 
         if "difficulty" in data:
-            difficulty = parse_enum(DifficultyEnum, data["difficulty"])
-        else:
-            difficulty = todo.difficulty
+            todo.difficulty = parse_enum(DifficultyEnum, data["difficulty"])
 
         if "status" in data:
-            status = parse_enum(ToDoStatusEnum, data["status"])
-        else:
-            status = todo.status
-
-        todo.title = title
-        todo.checklist = checklist
-        todo.description = description
-        todo.difficulty = difficulty
-        todo.status = status
-        todo.date_modified = utc_now_iso()
+            todo.status = parse_enum(ToDoStatusEnum, data["status"])
 
         self.todo_repo.update(user_id=user_id, todo=todo)
         return todo
@@ -90,6 +77,5 @@ class ToDoService:
     def delete(self, user_id: str, todo_id: str) -> None:
         todo = self.get(user_id=user_id, todo_id=todo_id)
         todo.status = ToDoStatusEnum.DELETED
-        todo.date_modified = utc_now_iso()
 
         self.todo_repo.update(user_id=user_id, todo=todo)

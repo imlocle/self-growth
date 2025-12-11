@@ -9,6 +9,7 @@ from mypy_boto3_dynamodb.type_defs import (
 
 from aws.dynamodb_service import DynamodbService
 from models.blog_post import BlogPost
+from utils.helper import utc_now_iso
 
 
 class BlogPostRepository:
@@ -47,6 +48,7 @@ class BlogPostRepository:
         return self.dynamodb_service.query(query_params)
 
     def update(self, user_id: str, post: BlogPost) -> None:
+        post.date_modified = utc_now_iso()
         put_params: PutItemInputTablePutItemTypeDef = {
             "Item": {
                 "pk": f"USER#{user_id}",

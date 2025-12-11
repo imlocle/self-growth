@@ -10,6 +10,7 @@ from mypy_boto3_dynamodb.type_defs import (
 
 from aws.dynamodb_service import DynamodbService
 from models.todo import ToDo
+from utils.helper import utc_now_iso
 
 
 class ToDoRepository:
@@ -51,6 +52,7 @@ class ToDoRepository:
         return self.dynamodb_service.query(query_params)
 
     def update(self, user_id: str, todo: ToDo) -> None:
+        todo.date_modified = utc_now_iso()
         put_params: PutItemInputTablePutItemTypeDef = {
             "Item": {
                 "pk": f"USER#{user_id}",

@@ -42,28 +42,18 @@ class BlogPostService:
             title = data["title"]
             if not isinstance(title, str) or not title.strip():
                 raise ValueError("title must be a non-empty string")
-        else:
-            title = blog_post.title
+            blog_post.title = title
 
         if "content" in data:
             content = data["content"]
             if not isinstance(content, str) or not content.strip():
                 raise ValueError("content must be a non-empty string")
-        else:
-            content = blog_post.content
+            blog_post.content = content
 
-        summary = data.get("summary", blog_post.summary)
+        blog_post.summary = data.get("summary", blog_post.summary)
 
         if "status" in data:
-            status = parse_enum(BlogStatusEnum, data["status"])
-        else:
-            status = blog_post.status
-
-        blog_post.title = title
-        blog_post.content = content
-        blog_post.summary = summary
-        blog_post.status = status
-        blog_post.date_modified = utc_now_iso()
+            blog_post.status = parse_enum(BlogStatusEnum, data["status"])
 
         self.blog_repo.update(user_id=user_id, post=blog_post)
         return blog_post
