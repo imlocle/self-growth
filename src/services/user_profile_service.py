@@ -1,4 +1,4 @@
-from models.enum import StatusEnum
+from models.enum import ToDoStatusEnum
 from models.user_profile import UserProfile
 from repositories.user_profile_repository import UserProfileRepository
 from utils.helper import generate_id, utc_now_iso
@@ -41,11 +41,11 @@ class UserProfileService:
         if "status" in data:
             status_raw = data["status"]
             try:
-                status = StatusEnum(status_raw)
+                status = ToDoStatusEnum(status_raw)
             except ValueError:
                 raise ValueError(
                     f"Invalid status: '{status_raw}'. "
-                    f"Expected one of: {[s.value for s in StatusEnum]}"
+                    f"Expected one of: {[s.value for s in ToDoStatusEnum]}"
                 )
         else:
             status = existing["status"]

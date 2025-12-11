@@ -1,33 +1,26 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-import json
 import re
 from typing import Any, Dict
 
+from models.base_model import BaseModel
 from utils.constants import EMAIL_REGEX, NAME_REGEX, PHONE_REGEX, USERNAME_REGEX
 
 
 @dataclass
-class UserProfile:
+class UserProfile(BaseModel):
     id: str
     first_name: str
     last_name: str
     username: str
     phone_number: str
     email: str
-    points: float
-    level: int
     date_created: str
     date_modified: str
 
-    # ---------- Input Helpers ----------
-
-    @classmethod
-    def from_event(cls, event: Dict[str, Any]) -> Dict[str, Any]:
-        body_str = event.get("body", "{}")
-        body = json.loads(body_str)
-        return cls.from_dict(body)
+    points: float = 0
+    level: int = 1
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> Dict[str, Any]:
@@ -36,30 +29,28 @@ class UserProfile:
         The service layer will assign id and timestamps.
         """
 
-        # --- Required fields ---
         first_name = data.get("first_name")
         if not isinstance(first_name, str) or not first_name.strip():
-            raise ValueError("First name is required and must be non-empty")
+            raise ValueError("first name is required and must be non-empty")
         if not re.match(NAME_REGEX, first_name):
             raise ValueError(
-                "First name may only contain letters, spaces, apostrophes, or hyphens"
+                "first name may only contain letters, spaces, apostrophes, or hyphens"
             )
 
-        # --- Last Name ---
         last_name = data.get("last_name")
         if not isinstance(last_name, str) or not last_name.strip():
-            raise ValueError("Last name is required and must be non-empty")
+            raise ValueError("last name is required and must be non-empty")
         if not re.match(NAME_REGEX, last_name):
             raise ValueError(
-                "Last name may only contain letters, spaces, apostrophes, or hyphens"
+                "last name may only contain letters, spaces, apostrophes, or hyphens"
             )
 
         username = data.get("username")
         if not isinstance(username, str) or not username.strip():
-            raise ValueError("Username is required and must be non-empty")
+            raise ValueError("username is required and must be non-empty")
         if not re.match(USERNAME_REGEX, username):
             raise ValueError(
-                "Username must be 3-20 characters long and contain only letters, numbers, or underscores"
+                "username must be 3-20 characters long and contain only letters, numbers, or underscores"
             )
 
         email = data.get("email")
@@ -101,8 +92,6 @@ class UserProfile:
             date_modified=item["date_modified"],
         )
 
-    # ---------- Output Helpers ----------
-
     def to_dict(self) -> Dict[str, Any]:
         return {
             "id": self.id,
@@ -116,6 +105,3 @@ class UserProfile:
             "date_created": self.date_created,
             "date_modified": self.date_modified,
         }
-
-    def to_dynamo(self) -> Dict[str, Any]:
-        return self.to_dict()

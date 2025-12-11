@@ -3,7 +3,7 @@ from typing import Any, Dict
 from models.blog_post import BlogPost
 from models.enum import BlogStatusEnum
 from repositories.blog_post_repository import BlogPostRepository
-from utils.helper import generate_id, utc_now_iso
+from utils.helper import generate_id, parse_enum, utc_now_iso
 
 
 class BlogPostService:
@@ -36,51 +36,34 @@ class BlogPostService:
         }
 
     def update(self, user_id: str, post_id: str, data: Dict[str, Any]) -> BlogPost:
-        existing = self.blog_repo.get(user_id=user_id, post_id=post_id)
-        if not existing:
-            raise ValueError("Not Found")
+        blog_post = self.get(user_id=user_id, post_id=post_id)
 
-        # Title
         if "title" in data:
             title = data["title"]
             if not isinstance(title, str) or not title.strip():
                 raise ValueError("title must be a non-empty string")
         else:
-            title = existing["title"]
+            title = blog_post.title
 
-        # Content
         if "content" in data:
             content = data["content"]
             if not isinstance(content, str) or not content.strip():
                 raise ValueError("content must be a non-empty string")
         else:
-            content = existing["content"]
+            content = blog_post.content
 
-        # Summary
-        summary = data.get("summary", existing.get("summary"))
+        summary = data.get("summary", blog_post.summary)
 
-        # Status
         if "status" in data:
-            status_raw = data["status"]
-            try:
-                status = BlogStatusEnum(status_raw)
-            except ValueError:
-                raise ValueError(
-                    f"Invalid status: '{status_raw}'. "
-                    f"Expected one of: {[s.value for s in BlogStatusEnum]}"
-                )
+            status = parse_enum(BlogStatusEnum, data["status"])
         else:
-            status = BlogStatusEnum(existing["status"])
+            status = blog_post.status
 
-        updated_post = BlogPost(
-            id=existing["id"],
-            title=title,
-            content=content,
-            summary=summary,
-            status=status,
-            date_created=existing["date_created"],
-            date_modified=utc_now_iso(),
-        )
+        blog_post.title = title
+        blog_post.content = content
+        blog_post.summary = summary
+        blog_post.status = status
+        blog_post.date_modified = utc_now_iso()
 
-        self.blog_repo.update(user_id=user_id, post=updated_post)
-        return updated_post
+        self.blog_repo.update(user_id=user_id, post=blog_post)
+        return blog_post

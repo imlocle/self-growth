@@ -2,6 +2,7 @@ from typing import Any, Dict
 
 from models.blog_post import BlogPost
 from services.blog_post_service import BlogPostService
+from utils.helper import parse_request_body
 
 
 class BlogPostController:
@@ -9,14 +10,12 @@ class BlogPostController:
         self.event = event
         # TODO: replace with AuthService + Cognito later
         self.user_id = "1"
-        self.data = self.validate_data()
         self.blog_service = blog_service or BlogPostService()
 
-    def validate_data(self) -> Dict[str, Any]:
-        return BlogPost.from_event(self.event)
-
     def create(self) -> BlogPost:
-        return self.blog_service.create(self.user_id, self.data)
+        body = parse_request_body(self.event)
+        data = BlogPost.from_dict(body)
+        return self.blog_service.create(self.user_id, data)
 
     def get(self) -> BlogPost:
         post_id = self._get_path_params_id()
@@ -30,9 +29,10 @@ class BlogPostController:
         }
 
     def update(self) -> BlogPost:
+        data = parse_request_body(self.event)
         post_id = self._get_path_params_id()
         return self.blog_service.update(
-            user_id=self.user_id, post_id=post_id, data=self.data
+            user_id=self.user_id, post_id=post_id, data=data
         )
 
     def _get_path_params_id(self) -> str:
