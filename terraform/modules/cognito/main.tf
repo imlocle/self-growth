@@ -5,9 +5,8 @@
 resource "aws_cognito_user_pool" "this" {
   name = "${var.project_name}-user-pool-${var.environment}"
 
-  username_attributes = ["phone_number", "email"]
-
-  auto_verified_attributes = ["phone_number"]
+  username_attributes      = ["email"]
+  auto_verified_attributes = ["email"]
 
   password_policy {
     minimum_length    = 8
@@ -19,19 +18,15 @@ resource "aws_cognito_user_pool" "this" {
 
   account_recovery_setting {
     recovery_mechanism {
-      name     = "verified_phone_number"
-      priority = 1
-    }
-    recovery_mechanism {
       name     = "verified_email"
-      priority = 2
+      priority = 1
     }
   }
 
   schema {
     name                = "phone_number"
     attribute_data_type = "String"
-    required            = true
+    required            = false
     mutable             = true
 
     string_attribute_constraints {
@@ -99,8 +94,13 @@ resource "aws_cognito_user_pool_client" "this" {
   allowed_oauth_scopes = [
     "openid",
     "email",
-    "phone",
     "profile",
+  ]
+
+  explicit_auth_flows = [
+    "ALLOW_USER_PASSWORD_AUTH",
+    "ALLOW_REFRESH_TOKEN_AUTH",
+    "ALLOW_USER_SRP_AUTH",
   ]
 
   callback_urls = var.cognito_callback_urls
@@ -130,3 +130,5 @@ resource "aws_cognito_user_pool_domain" "this" {
   domain       = "${var.project_name}-${var.environment}"
   user_pool_id = aws_cognito_user_pool.this.id
 }
+
+

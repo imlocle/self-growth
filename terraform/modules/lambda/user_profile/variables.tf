@@ -29,7 +29,3 @@ variable "api_execution_arn" {
 variable "authorizer_id" {
   type = string
 }
-
-variable "cognito_client_id" {
-  type = string
-}

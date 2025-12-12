@@ -5,11 +5,46 @@ from utils.errors import AuthError
 
 
 class AuthService:
-    def __init__(self, cognito_service=None):
+    def __init__(self, event: Dict[str, Any], cognito_service: CognitoService = None):
+        self.event = event
         self.cognito_service = cognito_service or CognitoService()
 
     def login(self, username: str, password: str) -> Dict[str, Any]:
         return self.cognito_service.initiate_auth(username=username, password=password)
+
+    def signup(
+        self,
+        email: str,
+        password: str,
+        phone_number: str | None = None,
+        first_name: str | None = None,
+        last_name: str | None = None,
+    ):
+        return self.cognito_service.sign_up(
+            email=email,
+            phone_number=phone_number,
+            password=password,
+            first_name=first_name,
+            last_name=last_name,
+        )
+
+    def get_auth_user(self):
+        response = self.cognito_service.get_user(access_token=self.get_access_token())
+        return {"email": response.get("email"), "user_id": response.get("sub")}
+
+    def get_access_token(self) -> str:
+        headers = self.event.get("headers") or {}
+        auth_header = headers.get("authorization") or headers.get("Authorization")
+
+        if not auth_header:
+            raise ValueError("Missing Authorization header")
+
+        if auth_header.startswith("Bearer "):
+            access_token = auth_header.split(" ")[1]
+        else:
+            access_token = auth_header
+
+        return access_token
 
     @staticmethod
     def get_claims(event: Dict[str, Any]) -> Dict[str, Any]:

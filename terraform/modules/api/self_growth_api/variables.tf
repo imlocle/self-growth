@@ -17,7 +17,3 @@ variable "cognito_user_pool_client_id" {
 variable "cognito_user_pool_id" {
   type = string
 }
-
-variable "aws_wafv2_web_acl_arn" {
-  type = string
-}

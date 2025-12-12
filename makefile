@@ -12,7 +12,7 @@ BUILD_DIR = terraform/builds
 LAYER_ZIP = $(BUILD_DIR)/python.zip
 
 # List all Lambda logical names (WITHOUT env suffix or .zip)
-LAMBDAS = create-todo get-todo get-all-todo update-todo delete-todo create-habit get-habit get-all-habit update-habit
+LAMBDAS = create-todo get-todo get-all-todo update-todo delete-todo create-habit get-habit get-all-habit update-habit signup login create-user-profile
 
 BACKEND_CONFIG_TMP = terraform/backend.auto.hcl
 

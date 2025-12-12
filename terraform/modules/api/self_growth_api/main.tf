@@ -23,15 +23,9 @@ resource "aws_apigatewayv2_authorizer" "cognito" {
   }
 }
 
-
 resource "aws_apigatewayv2_stage" "default" {
   api_id      = aws_apigatewayv2_api.this.id
-  name        = "$default"
+  name        = var.environment
   auto_deploy = true
-}
-
-resource "aws_wafv2_web_acl_association" "api_waf_assoc" {
-  resource_arn = aws_apigatewayv2_api.this.execution_arn
-  web_acl_arn  = var.aws_wafv2_web_acl_arn
 }
 

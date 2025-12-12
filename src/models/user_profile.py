@@ -11,16 +11,16 @@ from utils.constants import EMAIL_REGEX, NAME_REGEX, PHONE_REGEX, USERNAME_REGEX
 @dataclass
 class UserProfile(BaseModel):
     id: str
-    first_name: str
-    last_name: str
     username: str
-    phone_number: str
     email: str
     date_created: str
     date_modified: str
 
     points: float = 0
     level: int = 1
+    first_name: str | None = None
+    last_name: str | None = None
+    phone_number: str | None = None
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> Dict[str, Any]:
@@ -30,20 +30,22 @@ class UserProfile(BaseModel):
         """
 
         first_name = data.get("first_name")
-        if not isinstance(first_name, str) or not first_name.strip():
-            raise ValueError("first name is required and must be non-empty")
-        if not re.match(NAME_REGEX, first_name):
-            raise ValueError(
-                "first name may only contain letters, spaces, apostrophes, or hyphens"
-            )
+        if first_name is not None:
+            if not isinstance(first_name, str) or not first_name.strip():
+                raise ValueError("first name is required and must be non-empty")
+            if not re.match(NAME_REGEX, first_name):
+                raise ValueError(
+                    "first name may only contain letters, spaces, apostrophes, or hyphens"
+                )
 
         last_name = data.get("last_name")
-        if not isinstance(last_name, str) or not last_name.strip():
-            raise ValueError("last name is required and must be non-empty")
-        if not re.match(NAME_REGEX, last_name):
-            raise ValueError(
-                "last name may only contain letters, spaces, apostrophes, or hyphens"
-            )
+        if last_name is not None:
+            if not isinstance(last_name, str) or not last_name.strip():
+                raise ValueError("last name is required and must be non-empty")
+            if not re.match(NAME_REGEX, last_name):
+                raise ValueError(
+                    "last name may only contain letters, spaces, apostrophes, or hyphens"
+                )
 
         username = data.get("username")
         if not isinstance(username, str) or not username.strip():
@@ -60,18 +62,19 @@ class UserProfile(BaseModel):
             raise ValueError(f"Invalid Email format: {email}")
 
         phone_number = data.get("phone_number")
-        if not isinstance(phone_number, str) or not phone_number.strip():
-            raise ValueError("Phone number is required and must be non-empty")
-        if not re.match(PHONE_REGEX, phone_number):
-            raise ValueError(
-                "Phone number must contain only digits (with optional +) and be 10-15 characters long"
-            )
+        if phone_number is not None:
+            if not isinstance(phone_number, str) or not phone_number.strip():
+                raise ValueError("Phone number is required and must be non-empty")
+            if not re.match(PHONE_REGEX, phone_number):
+                raise ValueError(
+                    "Phone number must contain only digits (with optional +) and be 10-15 characters long"
+                )
 
         return {
+            "email": email,
+            "username": username,
             "first_name": first_name,
             "last_name": last_name,
-            "username": username,
-            "email": email,
             "phone_number": phone_number,
             "points": data.get("points", 0),
             "level": data.get("level", 1),
