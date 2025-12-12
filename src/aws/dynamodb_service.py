@@ -1,6 +1,7 @@
 from typing import Any, Dict, List
 
 import boto3
+from mypy_boto3_dynamodb.service_resource import DynamoDBServiceResource, Table
 from mypy_boto3_dynamodb.type_defs import (
     ScanInputTableScanTypeDef,
     GetItemInputTableGetItemTypeDef,
@@ -13,9 +14,9 @@ from mypy_boto3_dynamodb.type_defs import (
 
 
 class DynamodbService:
-    def __init__(self, table_name):
-        self.ddb_resource = boto3.resource("dynamodb")
-        self.Table = self.ddb_resource.Table(table_name)
+    def __init__(self, table_name: str):
+        self.ddb_resource: DynamoDBServiceResource = boto3.resource("dynamodb")
+        self.Table: Table = self.ddb_resource.Table(table_name)
 
     @staticmethod
     def _enhance_request(

@@ -1,6 +1,7 @@
 from typing import Any, Dict, Optional
 
 from aws.cognito_service import CognitoService
+from models.auth import AuthUser
 from utils.errors import AuthError
 
 
@@ -28,9 +29,9 @@ class AuthService:
             last_name=last_name,
         )
 
-    def get_auth_user(self):
+    def get_auth_user(self) -> AuthUser:
         response = self.cognito_service.get_user(access_token=self.get_access_token())
-        return {"email": response.get("email"), "user_id": response.get("sub")}
+        return AuthUser.from_cognito(response)
 
     def get_access_token(self) -> str:
         headers = self.event.get("headers") or {}

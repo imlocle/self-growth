@@ -116,3 +116,14 @@ def parse_enum(enum_class: Any, raw_value: str):
 def parse_request_body(event: Dict[str, Any]) -> Dict[str, Any]:
     body = json.loads(event.get("body", "{}"))
     return dict_keys_to_snake_case(body)
+
+
+def validate_dict_str_value(
+    data: dict, key: str, default: str | None = None
+) -> str | None:
+    if key in data:
+        value = data[key]
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError(f"{key} must be a non-empty string")
+        return value
+    return default

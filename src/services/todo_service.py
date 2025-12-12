@@ -4,7 +4,13 @@ from models.enum import DifficultyEnum, ToDoStatusEnum
 from models.todo import ToDo
 from repositories.todo_repository import ToDoRepository
 from utils.errors import NotFoundError
-from utils.helper import generate_id, parse_enum, parse_iso, utc_now_iso
+from utils.helper import (
+    generate_id,
+    parse_enum,
+    parse_iso,
+    utc_now_iso,
+    validate_dict_str_value,
+)
 
 
 class ToDoService:
@@ -50,11 +56,7 @@ class ToDoService:
     def update(self, user_id: str, todo_id: str, data: dict) -> ToDo:
         todo = self.get(user_id=user_id, todo_id=todo_id)
 
-        if "title" in data:
-            title = data["title"]
-            if not isinstance(title, str) or not title.strip():
-                raise ValueError("title must be a non-empty string")
-            todo.title = title
+        todo.title = validate_dict_str_value(data, "title", todo.title)
 
         if "checklist" in data:
             checklist = data["checklist"]

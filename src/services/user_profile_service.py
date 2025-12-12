@@ -1,7 +1,6 @@
-from models.enum import ToDoStatusEnum
 from models.user_profile import UserProfile
 from repositories.user_profile_repository import UserProfileRepository
-from utils.helper import utc_now_iso
+from utils.helper import utc_now_iso, validate_dict_str_value
 
 
 class UserProfileService:
@@ -9,6 +8,10 @@ class UserProfileService:
         self.user_profile_repo = user_profile_repo or UserProfileRepository()
 
     def create(self, user_id: str, data: dict) -> UserProfile:
+        existing = self.user_profile_repo.get(user_id=user_id)
+        if existing:
+            raise ValueError("User already has a profile")
+
         timestamp = utc_now_iso()
 
         user_profile = UserProfile(
@@ -25,39 +28,18 @@ class UserProfileService:
         return UserProfile.from_dynamo(item)
 
     def update(self, user_id: str, data: dict) -> UserProfile:
-        existing = self.user_profile_repo.get(user_id=user_id)
-        if not existing:
-            raise ValueError("Not Found")
+        user_profile = self.get(user_id=user_id)
 
-        if "title" in data:
-            title = data["title"]
-            if not isinstance(title, str) or not title.strip():
-                raise ValueError("Title must be a non-empty string")
-        else:
-            title = existing["title"]
-
-        description = data.get("description", existing.get("description"))
-
-        if "status" in data:
-            status_raw = data["status"]
-            try:
-                status = ToDoStatusEnum(status_raw)
-            except ValueError:
-                raise ValueError(
-                    f"Invalid status: '{status_raw}'. "
-                    f"Expected one of: {[s.value for s in ToDoStatusEnum]}"
-                )
-        else:
-            status = existing["status"]
-
-        updated_user_profile = UserProfile(
-            id=existing["id"],
-            title=title,
-            description=description,
-            status=status,
-            date_created=existing["date_created"],
-            date_modified=utc_now_iso(),
+        user_profile.username = validate_dict_str_value(
+            data, "username", user_profile.username
         )
-        self.user_profile_repo.update(user_profile=updated_user_profile)
+        user_profile.first_name = validate_dict_str_value(
+            data, "first_name", user_profile.first_name
+        )
+        user_profile.last_name = validate_dict_str_value(
+            data, "last_name", user_profile.last_name
+        )
 
-        return updated_user_profile
+        self.user_profile_repo.update(user_profile=user_profile)
+
+        return user_profile

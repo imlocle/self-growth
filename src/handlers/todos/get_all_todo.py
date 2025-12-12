@@ -10,7 +10,7 @@ class GetAllToDoHandler:
         try:
             return success_response(body=self.controller.get_all())
         except Exception as e:
-            return error_response(message=str(e))
+            return error_response()
 
 
 def lambda_handler(event, context):

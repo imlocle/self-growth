@@ -13,7 +13,7 @@ class CreateHabitHandler:
         except ValueError as e:
             return error_response(message=str(e), status_code=400)
         except Exception as e:
-            return error_response(message=str(e))
+            return error_response()
 
 
 def lambda_handler(event, context):

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from decimal import Decimal
 import re
 from typing import Any, Dict
 
@@ -89,8 +90,16 @@ class UserProfile(BaseModel):
             username=item["username"],
             email=item["email"],
             phone_number=item["phone_number"],
-            points=item["points"],
-            level=item["level"],
+            points=(
+                float(item["points"])
+                if isinstance(item["points"], Decimal)
+                else item["points"]
+            ),
+            level=(
+                int(item["level"])
+                if isinstance(item["level"], Decimal)
+                else item["level"]
+            ),
             date_created=item["date_created"],
             date_modified=item["date_modified"],
         )

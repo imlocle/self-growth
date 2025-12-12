@@ -2,25 +2,30 @@ import os
 from typing import Any, Dict
 import boto3
 from botocore.exceptions import ClientError
+from mypy_boto3_cognito_idp.client import CognitoIdentityProviderClient
+from mypy_boto3_cognito_idp.type_defs import (
+    InitiateAuthRequestTypeDef,
+    SignUpRequestTypeDef,
+    GetUserRequestTypeDef,
+)
 
+from models.auth import AuthUser
 from utils.errors import AuthError
 
 
 class CognitoService:
     def __init__(self):
         self.client_id = os.getenv("COGNITO_CLIENT_ID")
-        self.client = boto3.client("cognito-idp")
+        self.client: CognitoIdentityProviderClient = boto3.client("cognito-idp")
 
     def initiate_auth(self, username: str, password: str) -> Dict[str, Any]:
         try:
-            response = self.client.initiate_auth(
-                AuthFlow="USER_PASSWORD_AUTH",
-                AuthParameters={
-                    "USERNAME": username,
-                    "PASSWORD": password,
-                },
-                ClientId=self.client_id,
-            )
+            params: InitiateAuthRequestTypeDef = {
+                "AuthFlow": "USER_PASSWORD_AUTH",
+                "AuthParameters": {"USERNAME": username, "PASSWORD": password},
+                "ClientId": self.client_id,
+            }
+            response = self.client.initiate_auth(**params)
         except self.client.exceptions.NotAuthorizedException:
             raise AuthError("Invalid username or password")
         except self.client.exceptions.UserNotFoundException:
@@ -49,7 +54,7 @@ class CognitoService:
         phone_number: str | None = None,
         first_name: str | None = None,
         last_name: str | None = None,
-    ):
+    ) -> Dict[str, Any]:
         user_attributes = [
             {"Name": "email", "Value": email},
         ]
@@ -61,12 +66,13 @@ class CognitoService:
             user_attributes.append({"Name": "family_name", "Value": last_name})
 
         try:
-            resp = self.client.sign_up(
-                ClientId=self.client_id,
-                Username=email,
-                Password=password,
-                UserAttributes=user_attributes,
-            )
+            params: SignUpRequestTypeDef = {
+                "ClientId": self.client_id,
+                "Username": email,
+                "Password": password,
+                "UserAttributes": user_attributes,
+            }
+            resp = self.client.sign_up(**params)
         except self.client.exceptions.UsernameExistsException:
             raise AuthError("An account with this email already exists")
         except self.client.exceptions.InvalidPasswordException as e:
@@ -86,35 +92,13 @@ class CognitoService:
     def get_user(self, access_token: str) -> Dict[str, Any]:
         """
         Fetch user attributes from Cognito using an access token.
-
-        Returns a dict with common fields and the raw response, e.g.:
-
-        {
-            "username": "...",
-            "sub": "...",
-            "email": "...",
-            "email_verified": True/False,
-            "phone_number": "...",
-            "attributes": { ... },      # all attributes as a flat dict
-            "raw": { ... }              # full GetUser response
-        }
         """
         try:
-            resp = self.client.get_user(AccessToken=access_token)
+            params: GetUserRequestTypeDef = {"AccessToken": access_token}
+            resp = self.client.get_user(**params)
         except self.client.exceptions.NotAuthorizedException:
             raise AuthError("Invalid or expired access token")
         except ClientError as e:
             raise AuthError("Failed to fetch user from Cognito") from e
 
-        attrs_list = resp.get("UserAttributes", [])
-        attrs = {a["Name"]: a["Value"] for a in attrs_list}
-
-        return {
-            "username": resp.get("Username"),
-            "sub": attrs.get("sub"),
-            "email": attrs.get("email"),
-            "email_verified": attrs.get("email_verified") == "true",
-            "phone_number": attrs.get("phone_number"),
-            "attributes": attrs,
-            "raw": resp,
-        }
+        return resp
