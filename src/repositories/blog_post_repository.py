@@ -1,4 +1,3 @@
-import os
 from typing import Dict
 
 from mypy_boto3_dynamodb.type_defs import (
@@ -7,18 +6,12 @@ from mypy_boto3_dynamodb.type_defs import (
     QueryInputTableQueryTypeDef,
 )
 
-from aws.dynamodb_service import DynamodbService
 from models.blog_post import BlogPost
+from repositories.base_repository import BaseRepository
 from utils.helper import utc_now_iso
 
 
-class BlogPostRepository:
-    def __init__(self, dynamodb_service: DynamodbService = None):
-        self.table_name = os.getenv("SELF_GROWTH_TABLE")
-        self.dynamodb_service = dynamodb_service or DynamodbService(
-            table_name=self.table_name
-        )
-
+class BlogPostRepository(BaseRepository):
     def create(self, user_id: str, post: BlogPost) -> None:
         put_params: PutItemInputTablePutItemTypeDef = {
             "Item": {

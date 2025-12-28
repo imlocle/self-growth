@@ -1,4 +1,3 @@
-import os
 from typing import Dict
 
 from mypy_boto3_dynamodb.type_defs import (
@@ -7,17 +6,12 @@ from mypy_boto3_dynamodb.type_defs import (
     QueryInputTableQueryTypeDef,
 )
 
-from aws.dynamodb_service import DynamodbService
 from models.habit import Habit
+from repositories.base_repository import BaseRepository
 from utils.helper import utc_now_iso
 
 
-class HabitRepository:
-    def __init__(self, dynamodb_service: DynamodbService = None):
-        self.dynamodb_service = dynamodb_service or DynamodbService(
-            table_name=os.getenv("SELF_GROWTH_TABLE")
-        )
-
+class HabitRepository(BaseRepository):
     def create(self, user_id: str, habit: Habit) -> None:
         put_params: PutItemInputTablePutItemTypeDef = {
             "Item": {

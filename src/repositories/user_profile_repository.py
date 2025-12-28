@@ -1,4 +1,3 @@
-import os
 from typing import Dict
 
 from mypy_boto3_dynamodb.type_defs import (
@@ -6,22 +5,17 @@ from mypy_boto3_dynamodb.type_defs import (
     GetItemInputTableGetItemTypeDef,
 )
 
-from aws.dynamodb_service import DynamodbService
 from models.user_profile import UserProfile
+from repositories.base_repository import BaseRepository
 from utils.helper import utc_now_iso
 
 
-class UserProfileRepository:
-    def __init__(self, dynamodb_service: DynamodbService = None):
-        self.dynamodb_service = dynamodb_service or DynamodbService(
-            table_name=os.getenv("SELF_GROWTH_TABLE")
-        )
-
+class UserProfileRepository(BaseRepository):
     def create(self, user_profile: UserProfile) -> None:
         put_params: PutItemInputTablePutItemTypeDef = {
             "Item": {
                 "pk": f"USER#{user_profile.id}",
-                "sk": f"PROFILE",
+                "sk": f"PROFILE#USER",
                 **user_profile.to_dynamo(),
             }
         }
@@ -29,7 +23,7 @@ class UserProfileRepository:
 
     def get(self, user_id: str) -> Dict | None:
         get_params: GetItemInputTableGetItemTypeDef = {
-            "Key": {"pk": f"USER#{user_id}", "sk": f"PROFILE"}
+            "Key": {"pk": f"USER#{user_id}", "sk": f"PROFILE#USER"}
         }
         return self.dynamodb_service.get(get_params)
 
@@ -38,7 +32,7 @@ class UserProfileRepository:
         put_params: PutItemInputTablePutItemTypeDef = {
             "Item": {
                 "pk": f"USER#{user_profile.id}",
-                "sk": f"PROFILE",
+                "sk": f"PROFILE#USER",
                 **user_profile.to_dynamo(),
             }
         }
