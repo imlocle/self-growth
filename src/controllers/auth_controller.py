@@ -81,3 +81,28 @@ class AuthController:
             first_name=data["first_name"],
             last_name=data["last_name"],
         )
+
+    def confirm_signup(self) -> Dict[str, Any]:
+        data = self._parse_validate_confirm_signup()
+        return self.auth_service.confirm_signup(
+            email=data["email"], confirmation_code=data["confirmation_code"]
+        )
+
+    def _parse_validate_confirm_signup(self) -> Dict[str, Any]:
+        body = parse_request_body(self.event)
+
+        email = body.get("email")
+        code = body.get("confirmation_code")
+
+        if not isinstance(email, str) or not email.strip():
+            raise ValueError("email is required and must be non-empty")
+        if not re.match(EMAIL_REGEX, email):
+            raise ValueError(f"Invalid email format: {email}")
+
+        if not isinstance(code, str) or not code.strip():
+            raise ValueError("confirmation_code is required and must be non-empty")
+
+        if len(code.strip()) < 4:
+            raise ValueError("confirmation_code looks too short")
+
+        return {"email": email, "confirmation_code": code.strip()}

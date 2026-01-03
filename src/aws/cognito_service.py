@@ -9,7 +9,6 @@ from mypy_boto3_cognito_idp.type_defs import (
     GetUserRequestTypeDef,
 )
 
-from models.auth import AuthUser
 from utils.errors import AuthError
 
 
@@ -87,6 +86,32 @@ class CognitoService:
             "user_confirmed": resp.get("UserConfirmed", False),
             "code_delivery": resp.get("CodeDeliveryDetails", {}),
             "message": "Signup successful. Please confirm the code sent to your email.",
+        }
+
+    def confirm_sign_up(self, email: str, confirmation_code: str) -> Dict[str, Any]:
+        """
+        Confirm a Cognito user's signup using the emailed confirmation code.
+        Public operation; no JWT required.
+        """
+        try:
+            resp = self.client.confirm_sign_up(
+                ClientId=self.client_id,
+                Username=email,
+                ConfirmationCode=confirmation_code,
+            )
+        except self.client.exceptions.CodeMismatchException:
+            raise AuthError("Invalid confirmation code")
+        except self.client.exceptions.ExpiredCodeException:
+            raise AuthError("Confirmation code has expired")
+        except self.client.exceptions.UserNotFoundException:
+            raise AuthError("User not found")
+        except self.client.exceptions.NotAuthorizedException:
+            raise AuthError("User is already confirmed or cannot be confirmed")
+        except ClientError as e:
+            raise AuthError("Confirm signup failed") from e
+        print(resp)
+        return {
+            "message": "Signup confirmed. You can now log in.",
         }
 
     def get_user(self, access_token: str) -> Dict[str, Any]:

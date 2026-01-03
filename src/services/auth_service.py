@@ -29,6 +29,9 @@ class AuthService:
             last_name=last_name,
         )
 
+    def confirm_signup(self, email: str, confirmation_code: str) -> Dict[str, Any]:
+        return self.cognito_service.confirm_sign_up(email, confirmation_code)
+
     def get_auth_user(self) -> AuthUser:
         response = self.cognito_service.get_user(access_token=self.get_access_token())
         return AuthUser.from_cognito(response)

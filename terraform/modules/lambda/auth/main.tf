@@ -19,3 +19,14 @@ module "login" {
   api_id            = var.api_id
   cognito_client_id = var.cognito_client_id
 }
+
+module "confirm_signup" {
+  source            = "./confirm_signup"
+  environment       = var.environment
+  project_name      = var.project_name
+  runtime           = var.runtime
+  lambda_name       = "confirm-signup"
+  api_execution_arn = var.api_execution_arn
+  api_id            = var.api_id
+  cognito_client_id = var.cognito_client_id
+}
