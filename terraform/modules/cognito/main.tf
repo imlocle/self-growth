@@ -111,13 +111,13 @@ resource "aws_cognito_user_pool_client" "this" {
   prevent_user_existence_errors = "ENABLED"
 
   # JWT token lifetimes
-  access_token_validity  = 60
-  id_token_validity      = 60
-  refresh_token_validity = 30
+  access_token_validity  = 1
+  id_token_validity      = 1
+  refresh_token_validity = 3650
 
   token_validity_units {
-    access_token  = "minutes"
-    id_token      = "minutes"
+    access_token  = "days"
+    id_token      = "days"
     refresh_token = "days"
   }
 }

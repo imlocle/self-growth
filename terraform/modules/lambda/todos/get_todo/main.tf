@@ -89,6 +89,7 @@ resource "aws_lambda_function" "this" {
   environment {
     variables = {
       SELF_GROWTH_TABLE = var.self_growth_table_id
+      COGNITO_CLIENT_ID = var.cognito_client_id
     }
   }
 }
@@ -131,7 +132,7 @@ resource "aws_apigatewayv2_integration" "this" {
 
 resource "aws_apigatewayv2_route" "this" {
   api_id    = var.api_id
-  route_key = "GET /todo/{todoId}"
+  route_key = "GET /households/{householdId}/subjects/{subjectId}/todos/{todoId}"
   target    = "integrations/${aws_apigatewayv2_integration.this.id}"
 
   authorization_type = "JWT"

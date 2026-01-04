@@ -1,7 +1,7 @@
 from typing import Any, Dict
 
 from controllers.todo_controller import ToDoController
-from utils.errors import AuthError
+from utils.errors import AuthError, ForbiddenError, NotFoundError
 from utils.response_util import success_response, error_response
 
 
@@ -17,8 +17,10 @@ class CreateToDoHandler:
             return error_response(message=str(e), status_code=401)
         except ValueError as e:
             return error_response(message=str(e), status_code=400)
+        except ForbiddenError or NotFoundError as e:
+            return error_response(message=str(e), status_code=404)
         except Exception as e:
-            return error_response()
+            return error_response(message=str(e))
 
 
 def lambda_handler(event, context):

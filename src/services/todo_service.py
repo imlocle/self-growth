@@ -3,6 +3,7 @@ from typing import Any, Dict
 from models.enum import DifficultyEnum, ToDoStatusEnum
 from models.todo import ToDo
 from repositories.todo_repository import ToDoRepository
+from services.access_service import AccessService
 from utils.errors import NotFoundError
 from utils.helper import (
     generate_id,
@@ -14,28 +15,60 @@ from utils.helper import (
 
 
 class ToDoService:
-    def __init__(self, todo_repo: ToDoRepository = None):
+    def __init__(
+        self,
+        todo_repo: ToDoRepository = None,
+        access_service: AccessService | None = None,
+    ):
         self.todo_repo = todo_repo or ToDoRepository()
+        self.access = access_service or AccessService()
 
-    def create(self, user_id: str, data: dict) -> ToDo:
+    def create(self, user_id: str, data: Dict[str, Any]) -> ToDo:
         timestamp = utc_now_iso()
-
         todo = ToDo(
             id=generate_id(), date_created=timestamp, date_modified=timestamp, **data
         )
-        self.todo_repo.create(user_id, todo)
 
+        self.access.assert_household_member(
+            user_id=user_id, household_id=todo.household_id
+        )
+        self.access.assert_subject_in_household(
+            household_id=todo.household_id, subject_id=todo.subject_id
+        )
+
+        self.todo_repo.create(todo)
         return todo
 
-    def get(self, user_id: str, todo_id: str) -> ToDo:
-        item = self.todo_repo.get(user_id, todo_id)
+    def get(
+        self, user_id: str, household_id: str, subject_id: str, todo_id: str
+    ) -> ToDo:
+        self.access.assert_household_member(user_id=user_id, household_id=household_id)
+        self.access.assert_subject_in_household(
+            household_id=household_id, subject_id=subject_id
+        )
+
+        item = self.todo_repo.get(
+            household_id=household_id, subject_id=subject_id, todo_id=todo_id
+        )
         if not item:
             raise NotFoundError("Not Found")
-
         return ToDo.from_dynamo(item)
 
-    def get_all(self, user_id: str, sort_by: str = "date_modifed") -> Dict[str, Any]:
-        response = self.todo_repo.get_all(user_id)
+    def get_all(
+        self,
+        user_id: str,
+        household_id: str,
+        subject_id: str,
+        sort_by: str = "date_modifed",
+    ) -> Dict[str, Any]:
+        self.access.assert_household_member(user_id=user_id, household_id=household_id)
+        self.access.assert_subject_in_household(
+            household_id=household_id, subject_id=subject_id
+        )
+
+        response = self.todo_repo.get_all(
+            household_id=household_id, subject_id=subject_id
+        )
         items = [ToDo.from_dynamo(i) for i in response.get("items")]
 
         if sort_by == "date_due":
@@ -53,8 +86,15 @@ class ToDoService:
             "lastEvaluatedKey": response.get("lastEvaluatedKey"),
         }
 
-    def update(self, user_id: str, todo_id: str, data: dict) -> ToDo:
-        todo = self.get(user_id=user_id, todo_id=todo_id)
+    def update(
+        self, user_id: str, household_id: str, subject_id: str, todo_id: str, data: dict
+    ) -> ToDo:
+        todo = self.get(
+            user_id=user_id,
+            household_id=household_id,
+            subject_id=subject_id,
+            todo_id=todo_id,
+        )
 
         todo.title = validate_dict_str_value(data, "title", todo.title)
 
@@ -74,11 +114,18 @@ class ToDoService:
         if "status" in data:
             todo.status = parse_enum(ToDoStatusEnum, data["status"])
 
-        self.todo_repo.update(user_id=user_id, todo=todo)
+        self.todo_repo.update(todo=todo)
         return todo
 
-    def delete(self, user_id: str, todo_id: str) -> None:
-        todo = self.get(user_id=user_id, todo_id=todo_id)
+    def delete(
+        self, user_id: str, household_id: str, subject_id: str, todo_id: str
+    ) -> None:
+        todo = self.get(
+            user_id=user_id,
+            household_id=household_id,
+            subject_id=subject_id,
+            todo_id=todo_id,
+        )
         todo.status = ToDoStatusEnum.DELETED
 
-        self.todo_repo.update(user_id=user_id, todo=todo)
+        self.todo_repo.update(todo=todo)

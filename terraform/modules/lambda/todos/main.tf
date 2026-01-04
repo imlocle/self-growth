@@ -9,6 +9,7 @@ module "create_todo" {
   api_execution_arn     = var.api_execution_arn
   api_id                = var.api_id
   authorizer_id         = var.authorizer_id
+  cognito_client_id     = var.cognito_client_id
 }
 
 module "get_todo" {
@@ -22,6 +23,7 @@ module "get_todo" {
   api_execution_arn     = var.api_execution_arn
   api_id                = var.api_id
   authorizer_id         = var.authorizer_id
+  cognito_client_id     = var.cognito_client_id
 }
 
 module "get_all_todo" {
@@ -35,6 +37,7 @@ module "get_all_todo" {
   api_execution_arn     = var.api_execution_arn
   api_id                = var.api_id
   authorizer_id         = var.authorizer_id
+  cognito_client_id     = var.cognito_client_id
 }
 
 module "update_todo" {
@@ -48,6 +51,7 @@ module "update_todo" {
   api_execution_arn     = var.api_execution_arn
   api_id                = var.api_id
   authorizer_id         = var.authorizer_id
+  cognito_client_id     = var.cognito_client_id
 }
 
 module "delete_todo" {
@@ -61,4 +65,5 @@ module "delete_todo" {
   api_execution_arn     = var.api_execution_arn
   api_id                = var.api_id
   authorizer_id         = var.authorizer_id
+  cognito_client_id     = var.cognito_client_id
 }

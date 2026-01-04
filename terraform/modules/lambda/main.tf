@@ -33,6 +33,7 @@ module "todos" {
   api_execution_arn     = var.api_execution_arn
   api_id                = var.api_id
   authorizer_id         = var.authorizer_id
+  cognito_client_id     = var.cognito_client_id
 }
 
 module "habits" {
