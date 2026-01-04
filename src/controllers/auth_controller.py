@@ -1,19 +1,18 @@
 import re
 from typing import Any, Dict
-from services.auth_service import AuthService
+
+from controllers.base_controller import BaseController
 from utils.constants import EMAIL_REGEX, PHONE_REGEX
 from utils.helper import parse_request_body
 
 
-class AuthController:
-    def __init__(self, event, auth_service: AuthService = None):
-        self.event = event
-        self.auth_service = auth_service or AuthService(event=event)
+class AuthController(BaseController):
+    def __init__(self, event):
+        super().__init__(event=event, require_auth=False)
 
     def _parse_and_validate_login(self) -> Dict[str, Any]:
-        body = parse_request_body(self.event)
-        username = body.get("username") or body.get("email")
-        password = body.get("password")
+        username = self.body.get("username") or self.body.get("email")
+        password = self.body.get("password")
 
         if not isinstance(username, str) or not username.strip():
             raise ValueError(
