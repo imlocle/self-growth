@@ -6,8 +6,7 @@ from utils.errors import AuthError
 
 
 class AuthService:
-    def __init__(self, event: Dict[str, Any], cognito_service: CognitoService = None):
-        self.event = event
+    def __init__(self, cognito_service: CognitoService = None):
         self.cognito_service = cognito_service or CognitoService()
 
     def login(self, username: str, password: str) -> Dict[str, Any]:
@@ -32,23 +31,38 @@ class AuthService:
     def confirm_signup(self, email: str, confirmation_code: str) -> Dict[str, Any]:
         return self.cognito_service.confirm_sign_up(email, confirmation_code)
 
-    def get_auth_user(self) -> AuthUser:
-        response = self.cognito_service.get_user(access_token=self.get_access_token())
+    def get_auth_user_from_cognito(self, event: Dict[str, Any]) -> AuthUser:
+        response = self.cognito_service.get_user(
+            access_token=self.get_access_token(event=event)
+        )
         return AuthUser.from_cognito(response)
 
-    def get_access_token(self) -> str:
-        headers = self.event.get("headers") or {}
-        auth_header = headers.get("authorization") or headers.get("Authorization")
+    @staticmethod
+    def get_auth_user_from_claims(event: Dict[str, Any]) -> AuthUser:
+        claims = AuthService.get_claims(event)
+
+        user_id = claims.get("sub") or claims.get("username")
+        if not user_id:
+            raise AuthError("Missing 'sub' claim in JWT")
+
+        return AuthUser(
+            user_id=user_id,
+            attributes=claims,
+        )
+
+    @staticmethod
+    def get_access_token(event: Dict[str, Any]) -> str:
+        headers = event.get("headers") or {}
+        auth_header: str = headers.get("authorization") or headers.get("Authorization")
 
         if not auth_header:
             raise ValueError("Missing Authorization header")
 
-        if auth_header.startswith("Bearer "):
-            access_token = auth_header.split(" ")[1]
-        else:
-            access_token = auth_header
+        parts = auth_header.split()
+        if len(parts) == 2 and parts[0].lower() == "bearer":
+            return parts[1]
 
-        return access_token
+        return auth_header
 
     @staticmethod
     def get_claims(event: Dict[str, Any]) -> Dict[str, Any]:
@@ -65,18 +79,6 @@ class AuthService:
             ) or {}
         except Exception as e:
             raise AuthError(f"Invalid authorizer context: {e}")
-
-    @staticmethod
-    def get_user_id_from_event(event: Dict[str, Any]) -> str:
-        """
-        Extract the authenticated user id (Cognito sub) from the API Gateway
-        event populated by the JWT authorizer.
-        """
-        claims = AuthService.get_claims(event)
-        user_id = claims.get("sub")
-        if not user_id:
-            raise ValueError("Missing 'sub' claim in JWT")
-        return user_id
 
     @staticmethod
     def get_claim(

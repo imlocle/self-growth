@@ -14,11 +14,12 @@ class UserProfile(BaseModel):
     id: str
     username: str
     email: str
+    household_id: str
+    subject_id: str
     date_created: str
     date_modified: str
 
-    points: float = 0
-    level: int = 1
+    entity: str = "UserProfile"
     first_name: str | None = None
     last_name: str | None = None
     phone_number: str | None = None
@@ -76,9 +77,10 @@ class UserProfile(BaseModel):
             "username": username,
             "first_name": first_name,
             "last_name": last_name,
+            "entity": data.get("entity", "UserProfile"),
             "phone_number": phone_number,
-            "points": data.get("points", 0),
-            "level": data.get("level", 1),
+            "household_id": data.get("household_id"),
+            "subject_id": data.get("subject_id"),
         }
 
     @classmethod
@@ -89,17 +91,10 @@ class UserProfile(BaseModel):
             last_name=item["last_name"],
             username=item["username"],
             email=item["email"],
+            entity=item.get("entity"),
             phone_number=item["phone_number"],
-            points=(
-                float(item["points"])
-                if isinstance(item["points"], Decimal)
-                else item["points"]
-            ),
-            level=(
-                int(item["level"])
-                if isinstance(item["level"], Decimal)
-                else item["level"]
-            ),
+            household_id=item.get("household_id"),
+            subject_id=item.get("subject_id"),
             date_created=item["date_created"],
             date_modified=item["date_modified"],
         )
@@ -111,9 +106,10 @@ class UserProfile(BaseModel):
             "last_name": self.last_name,
             "username": self.username,
             "email": self.email,
+            "entity": self.entity,
             "phone_number": self.phone_number,
-            "points": self.points,
-            "level": self.level,
+            "household_id": self.household_id,
+            "subject_id": self.subject_id,
             "date_created": self.date_created,
             "date_modified": self.date_modified,
         }

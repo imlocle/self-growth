@@ -7,7 +7,7 @@ from typing import Any, Dict, Optional
 @dataclass
 class AuthUser:
     user_id: str
-    email: str
+    email: Optional[str] = None
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     attributes: Optional[Dict[str, Any]] = None

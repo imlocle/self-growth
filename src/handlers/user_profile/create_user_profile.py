@@ -1,6 +1,6 @@
 from controllers.user_profile_controller import UserProfileController
-from utils.response_util import success_response, error_response
 from utils.errors import AuthError
+from utils.response_util import success_response, error_response
 
 
 class CreateUserProfileHandler:
@@ -16,8 +16,7 @@ class CreateUserProfileHandler:
         except ValueError as e:
             return error_response(message=str(e), status_code=400)
         except Exception as e:
-            print(e)
-            return error_response()
+            return error_response(message=str(e))
 
 
 def lambda_handler(event, context):
