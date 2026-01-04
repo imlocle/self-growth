@@ -4,3 +4,7 @@ class NotFoundError(Exception):
 
 class AuthError(Exception):
     pass
+
+
+class ForbiddenError(Exception):
+    pass

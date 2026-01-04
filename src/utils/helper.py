@@ -114,7 +114,7 @@ def parse_enum(enum_class: Any, raw_value: str):
 
 
 def parse_request_body(event: Dict[str, Any]) -> Dict[str, Any]:
-    body = json.loads(event.get("body", "{}"))
+    body = json.loads(event.get("body") or "{}")
     return dict_keys_to_snake_case(body)
 
 

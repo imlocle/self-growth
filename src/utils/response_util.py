@@ -24,6 +24,8 @@ def error_response(
     message: str = "Internal server error",
     status_code: int = 500,
 ):
+    print(message)
+    message = "Internal server error" if status_code == 500 else message
     return {
         "statusCode": status_code,
         "body": json.dumps({"error": message}),
