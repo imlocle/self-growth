@@ -1,10 +1,16 @@
 class NotFoundError(Exception):
-    pass
+    def __init__(self, message: str):
+        self.message = message
+        super().__init__(self.message)
 
 
 class AuthError(Exception):
-    pass
+    def __init__(self, message: str):
+        self.message = message
+        super().__init__(self.message)
 
 
 class ForbiddenError(Exception):
-    pass
+    def __init__(self, message: str):
+        self.message = message
+        super().__init__(self.message)

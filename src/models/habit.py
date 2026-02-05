@@ -17,10 +17,13 @@ from utils.helper import parse_enum
 class Habit(BaseModel):
     id: str
     title: str
+    household_id: str
+    subject_id: str
     date_created: str
     date_modified: str
 
     counter: HabitCounterEnum = HabitCounterEnum.DAILY
+    entity: str = "Habit"
     description: Optional[str] = None
     difficulty: DifficultyEnum = DifficultyEnum.EASY
     status: HabitStatusEnum = HabitStatusEnum.ACTIVE
@@ -70,12 +73,15 @@ class Habit(BaseModel):
         """
         return cls(
             id=item["id"],
+            household_id=item["household_id"],
+            subject_id=item["subject_id"],
             title=item["title"],
             description=item.get("description"),
             counter=HabitCounterEnum(item.get("counter", HabitCounterEnum.DAILY.value)),
             difficulty=DifficultyEnum(
                 item.get("difficulty", DifficultyEnum.EASY.value)
             ),
+            entity=item.get("entity", "Habit"),
             type=HabitTypeEnum(item["type"]),
             status=HabitStatusEnum(item["status"]),
             date_created=item["date_created"],
@@ -85,6 +91,9 @@ class Habit(BaseModel):
     def to_dict(self) -> Dict[str, Any]:
         return {
             "id": self.id,
+            "entity": self.entity,
+            "household_id": self.household_id,
+            "subject_id": self.subject_id,
             "title": self.title,
             "description": self.description,
             "counter": self.counter.value,

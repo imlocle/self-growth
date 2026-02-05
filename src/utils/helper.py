@@ -1,7 +1,6 @@
 from datetime import datetime, timezone
-import json
 import re
-from typing import Any, Dict
+from typing import Any
 import uuid
 
 
@@ -111,11 +110,6 @@ def parse_enum(enum_class: Any, raw_value: str):
     except ValueError:
         allowed = [e.value for e in enum_class]
         raise ValueError(f"Invalid value: '{raw_value}'. " f"Allowed values: {allowed}")
-
-
-def parse_request_body(event: Dict[str, Any]) -> Dict[str, Any]:
-    body = json.loads(event.get("body") or "{}")
-    return dict_keys_to_snake_case(body)
 
 
 def validate_dict_str_value(

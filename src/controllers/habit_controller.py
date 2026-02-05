@@ -1,39 +1,65 @@
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
+from controllers.base_controller import BaseController
 from models.habit import Habit
 from services.habit_service import HabitService
-from utils.helper import parse_request_body
 
 
-class HabitController:
+class HabitController(BaseController):
     def __init__(self, event: Dict[str, Any], habit_service: HabitService = None):
-        self.event = event
-        # Create AuthService to get user_id
-        self.user_id = "1"
+        super().__init__(event=event, require_auth=True)
+
         self.habit_service = habit_service or HabitService()
+        self.habit_id = self._get_habit_id()
+
+    def _get_habit_id(self) -> Optional[str]:
+        path = self.event.get("pathParameters") or {}
+        return path.get("habitId")
 
     def create(self) -> Habit:
-        body = parse_request_body(self.event)
-        data = Habit.from_dict(body)
-        return self.habit_service.create(self.user_id, data)
+        household_id = self.require_household_id()
+        subject_id = self.require_subject_id()
+
+        data = Habit.from_dict(self.body)
+        return self.habit_service.create(
+            user_id=self.auth_user.user_id,
+            household_id=household_id,
+            subject_id=subject_id,
+            data=data,
+        )
 
     def get(self) -> Habit:
-        habit_id = self._get_path_params_id()
-        return self.habit_service.get(self.user_id, habit_id)
+        return self.habit_service.get(
+            user_id=self.auth_user.user_id,
+            household_id=self.household_id,
+            subject_id=self.subject_id,
+            habit_id=self.habit_id,
+        )
 
     def get_all(self) -> Dict[str, Any]:
-        response = self.habit_service.get_all(self.user_id)
+        response = self.habit_service.get_all(
+            user_id=self.auth_user.user_id,
+            household_id=self.household_id,
+            subject_id=self.subject_id,
+        )
         return {
             "items": [i.to_dict() for i in response.get("items")],
             "lastEvaluatedKey": response.get("lastEvaluatedKey"),
         }
 
     def update(self) -> Habit:
-        data = parse_request_body(self.event)
-        habit_id = self._get_path_params_id()
         return self.habit_service.update(
-            user_id=self.user_id, habit_id=habit_id, data=data
+            user_id=self.auth_user.user_id,
+            household_id=self.household_id,
+            subject_id=self.subject_id,
+            habit_id=self.habit_id,
+            data=self.body,
         )
 
-    def _get_path_params_id(self) -> str:
-        return self.event.get("pathParameters", {}).get("habitId")
+    def delete(self) -> None:
+        return self.habit_service.delete(
+            user_id=self.auth_user.user_id,
+            household_id=self.household_id,
+            subject_id=self.subject_id,
+            habit_id=self.habit_id,
+        )

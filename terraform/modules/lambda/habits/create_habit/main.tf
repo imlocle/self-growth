@@ -47,7 +47,8 @@ resource "aws_iam_role_policy" "lambda_policy" {
       {
         Effect = "Allow",
         Action = [
-          "dynamodb:PutItem"
+          "dynamodb:PutItem",
+          "dynamodb:GetItem"
         ],
         Resource = [
           "${var.self_growth_table_arn}",
@@ -89,6 +90,7 @@ resource "aws_lambda_function" "this" {
   environment {
     variables = {
       SELF_GROWTH_TABLE = var.self_growth_table_id
+      COGNITO_CLIENT_ID = var.cognito_client_id
     }
   }
 }
@@ -131,8 +133,11 @@ resource "aws_apigatewayv2_integration" "this" {
 
 resource "aws_apigatewayv2_route" "this" {
   api_id    = var.api_id
-  route_key = "POST /habit"
+  route_key = "POST /households/{householdId}/subjects/{subjectId}/habits"
   target    = "integrations/${aws_apigatewayv2_integration.this.id}"
+
+  authorization_type = "JWT"
+  authorizer_id      = var.authorizer_id
 }
 
 #####################################

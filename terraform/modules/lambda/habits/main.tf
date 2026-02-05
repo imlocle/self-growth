@@ -8,6 +8,8 @@ module "create_habit" {
   self_growth_table_id  = var.self_growth_table_id
   api_execution_arn     = var.api_execution_arn
   api_id                = var.api_id
+  authorizer_id         = var.authorizer_id
+  cognito_client_id     = var.cognito_client_id
 }
 
 module "get_habit" {
