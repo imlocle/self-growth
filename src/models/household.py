@@ -29,7 +29,6 @@ class Household(BaseModel):
         return {
             "name": name,
             "owner_user_id": owner_user_id,
-            "entity": data.get("entity", "Household"),
         }
 
     @classmethod
@@ -38,21 +37,7 @@ class Household(BaseModel):
             id=item["id"],
             name=item["name"],
             owner_user_id=item["owner_user_id"],
+            entity=item.get("entity", "Household"),
             date_created=item["date_created"],
             date_modified=item["date_modified"],
         )
-
-
-example_meta = {
-    "pk": "HOUSEHOLD#<household_id>",
-    "sk": "META#HOUSEHOLD",
-    "entity": "Household",
-    "household_id": "<household_id>",
-    "name": "Le Family",
-    "owner_user_id": "<user_id>",
-    "date_created": "...",
-    "date_modified": "...",
-}
-
-
-example_gsi = {"gsi1pk": "USER#<user_id>", "gsi1sk": "HOUSEHOLD#<household_id>"}

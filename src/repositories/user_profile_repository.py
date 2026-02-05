@@ -14,8 +14,8 @@ class UserProfileRepository(BaseRepository):
     def create(self, user_profile: UserProfile) -> None:
         put_params: PutItemInputTablePutItemTypeDef = {
             "Item": {
-                "pk": f"USER#{user_profile.id}",
-                "sk": f"PROFILE#USER",
+                "pk": f"AUTHUSER#{user_profile.id}",
+                "sk": f"META#PROFILE",
                 **user_profile.to_dynamo(),
             }
         }
@@ -23,7 +23,7 @@ class UserProfileRepository(BaseRepository):
 
     def get(self, user_id: str) -> Dict[str, Any] | None:
         get_params: GetItemInputTableGetItemTypeDef = {
-            "Key": {"pk": f"USER#{user_id}", "sk": f"PROFILE#USER"}
+            "Key": {"pk": f"AUTHUSER#{user_id}", "sk": f"META#PROFILE"}
         }
         return self.dynamodb_service.get(get_params)
 
@@ -31,8 +31,8 @@ class UserProfileRepository(BaseRepository):
         user_profile.date_modified = utc_now_iso()
         put_params: PutItemInputTablePutItemTypeDef = {
             "Item": {
-                "pk": f"USER#{user_profile.id}",
-                "sk": f"PROFILE#USER",
+                "pk": f"AUTHUSER#{user_profile.id}",
+                "sk": f"META#PROFILE",
                 **user_profile.to_dynamo(),
             }
         }

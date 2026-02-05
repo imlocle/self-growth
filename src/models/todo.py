@@ -31,16 +31,6 @@ class ToDo(BaseModel):
         Returns a dict with parsed fields.
         Service assigns id + timestamps.
         """
-        household_id = data.get("household_id")
-        if household_id is not None:
-            if not isinstance(household_id, str) or not household_id.strip():
-                raise ValueError("household_id is required and must be non-empty")
-
-        subject_id = data.get("subject_id")
-        if subject_id is not None:
-            if not isinstance(subject_id, str) or not subject_id.strip():
-                raise ValueError("subject_id is required and must be non-empty")
-
         title = data.get("title")
         if not isinstance(title, str) or not title.strip():
             raise ValueError("title is required and must be a non-empty string")
@@ -61,8 +51,6 @@ class ToDo(BaseModel):
         )
 
         return {
-            "household_id": household_id,
-            "subject_id": subject_id,
             "title": title.strip(),
             "checklist": checklist,
             "description": data.get("description"),
@@ -82,6 +70,7 @@ class ToDo(BaseModel):
             subject_id=item["subject_id"],
             title=item["title"],
             checklist=item.get("checklist"),
+            entity=item.get("entity", "ToDo"),
             description=item.get("description"),
             difficulty=DifficultyEnum(
                 item.get("difficulty", DifficultyEnum.EASY.value)

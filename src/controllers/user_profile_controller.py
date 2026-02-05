@@ -56,11 +56,11 @@ class UserProfileController(BaseController):
                 "username": username,
                 "first_name": self.body.get("first_name") or self.auth_user.first_name,
                 "last_name": self.body.get("last_name") or self.auth_user.last_name,
-                "household_id": household_id,
-                "subject_id": subject_id,
             }
         )
-        user_profile = self.user_profile_service.create(user_id=user_id, data=data)
+        user_profile = self.user_profile_service.create(
+            user_id=user_id, household_id=household_id, subject_id=subject_id, data=data
+        )
 
         if not self.household_service.is_exist(household_id=self.household_id):
             role = "OWNER"

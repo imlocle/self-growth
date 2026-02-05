@@ -11,3 +11,9 @@ class BaseRepository:
         self.dynamodb_service = dynamodb_service or DynamodbService(
             table_name=table_name
         )
+
+    def household_pk(self, household_id: str) -> str:
+        return f"HOUSEHOLD#{household_id}"
+
+    def subject_sk(self, subject_id: str) -> str:
+        return f"SUBJECT#{subject_id}"

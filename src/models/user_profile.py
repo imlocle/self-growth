@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from decimal import Decimal
 import re
 from typing import Any, Dict
 
@@ -12,8 +11,8 @@ from utils.constants import EMAIL_REGEX, NAME_REGEX, PHONE_REGEX, USERNAME_REGEX
 @dataclass
 class UserProfile(BaseModel):
     id: str
-    username: str
     email: str
+    username: str
     household_id: str
     subject_id: str
     date_created: str
@@ -27,27 +26,12 @@ class UserProfile(BaseModel):
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Validate raw user input and return a dict of parsed values.
-        The service layer will assign id and timestamps.
+        Validate raw profile input. Service assigns:
+        - id (Cognito sub)
+        - household_id
+        - subject_id
+        - timestamps
         """
-
-        first_name = data.get("first_name")
-        if first_name is not None:
-            if not isinstance(first_name, str) or not first_name.strip():
-                raise ValueError("first name is required and must be non-empty")
-            if not re.match(NAME_REGEX, first_name):
-                raise ValueError(
-                    "first name may only contain letters, spaces, apostrophes, or hyphens"
-                )
-
-        last_name = data.get("last_name")
-        if last_name is not None:
-            if not isinstance(last_name, str) or not last_name.strip():
-                raise ValueError("last name is required and must be non-empty")
-            if not re.match(NAME_REGEX, last_name):
-                raise ValueError(
-                    "last name may only contain letters, spaces, apostrophes, or hyphens"
-                )
 
         username = data.get("username")
         if not isinstance(username, str) or not username.strip():
@@ -59,17 +43,35 @@ class UserProfile(BaseModel):
 
         email = data.get("email")
         if not isinstance(email, str) or not email.strip():
-            raise ValueError("Email is required and must be a non-empty string")
+            raise ValueError("email is required and must be non-empty")
         if not re.match(EMAIL_REGEX, email):
-            raise ValueError(f"Invalid Email format: {email}")
+            raise ValueError(f"Invalid email format: {email}")
+
+        first_name = data.get("first_name")
+        if first_name is not None:
+            if not isinstance(first_name, str) or not first_name.strip():
+                raise ValueError("first_name must be non-empty if provided")
+            if not re.match(NAME_REGEX, first_name):
+                raise ValueError(
+                    "first_name may only contain letters, spaces, apostrophes, or hyphens"
+                )
+
+        last_name = data.get("last_name")
+        if last_name is not None:
+            if not isinstance(last_name, str) or not last_name.strip():
+                raise ValueError("last_name must be non-empty if provided")
+            if not re.match(NAME_REGEX, last_name):
+                raise ValueError(
+                    "last_name may only contain letters, spaces, apostrophes, or hyphens"
+                )
 
         phone_number = data.get("phone_number")
         if phone_number is not None:
             if not isinstance(phone_number, str) or not phone_number.strip():
-                raise ValueError("Phone number is required and must be non-empty")
+                raise ValueError("phone_number must be non-empty if provided")
             if not re.match(PHONE_REGEX, phone_number):
                 raise ValueError(
-                    "Phone number must contain only digits (with optional +) and be 10-15 characters long"
+                    "phone_number must contain only digits (with optional +) and be 10-15 characters long"
                 )
 
         return {
@@ -77,24 +79,21 @@ class UserProfile(BaseModel):
             "username": username,
             "first_name": first_name,
             "last_name": last_name,
-            "entity": data.get("entity", "UserProfile"),
             "phone_number": phone_number,
-            "household_id": data.get("household_id"),
-            "subject_id": data.get("subject_id"),
         }
 
     @classmethod
     def from_dynamo(cls, item: Dict[str, Any]) -> "UserProfile":
         return cls(
             id=item["id"],
-            first_name=item["first_name"],
-            last_name=item["last_name"],
-            username=item["username"],
             email=item["email"],
-            entity=item.get("entity"),
-            phone_number=item["phone_number"],
-            household_id=item.get("household_id"),
-            subject_id=item.get("subject_id"),
+            username=item["username"],
+            first_name=item.get("first_name"),
+            last_name=item.get("last_name"),
+            phone_number=item.get("phone_number"),
+            household_id=item["household_id"],
+            subject_id=item["subject_id"],
+            entity=item.get("entity", "UserProfile"),
             date_created=item["date_created"],
             date_modified=item["date_modified"],
         )
@@ -102,11 +101,11 @@ class UserProfile(BaseModel):
     def to_dict(self) -> Dict[str, Any]:
         return {
             "id": self.id,
+            "entity": self.entity,
+            "email": self.email,
+            "username": self.username,
             "first_name": self.first_name,
             "last_name": self.last_name,
-            "username": self.username,
-            "email": self.email,
-            "entity": self.entity,
             "phone_number": self.phone_number,
             "household_id": self.household_id,
             "subject_id": self.subject_id,

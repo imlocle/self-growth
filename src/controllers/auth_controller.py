@@ -3,7 +3,6 @@ from typing import Any, Dict
 
 from controllers.base_controller import BaseController
 from utils.constants import EMAIL_REGEX, PHONE_REGEX
-from utils.helper import parse_request_body
 
 
 class AuthController(BaseController):
@@ -38,13 +37,11 @@ class AuthController(BaseController):
         )
 
     def _parse_and_validate_signup(self) -> Dict[str, Any]:
-        body = parse_request_body(self.event)
-
-        phone_number = body.get("phone_number")
-        password = body.get("password")
-        email = body.get("email")
-        first_name = body.get("first_name")
-        last_name = body.get("last_name")
+        phone_number = self.body.get("phone_number")
+        password = self.body.get("password")
+        email = self.body.get("email")
+        first_name = self.body.get("first_name")
+        last_name = self.body.get("last_name")
 
         if phone_number is not None:
             if not isinstance(phone_number, str) or not phone_number.strip():
@@ -88,10 +85,8 @@ class AuthController(BaseController):
         )
 
     def _parse_validate_confirm_signup(self) -> Dict[str, Any]:
-        body = parse_request_body(self.event)
-
-        email = body.get("email")
-        code = body.get("confirmation_code")
+        email = self.body.get("email")
+        code = self.body.get("confirmation_code")
 
         if not isinstance(email, str) or not email.strip():
             raise ValueError("email is required and must be non-empty")

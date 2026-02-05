@@ -37,19 +37,6 @@ class HouseholdMember(BaseModel):
             "household_id": household_id,
             "user_id": user_id,
             "role": role,
-            "entity": data.get("entity", "Member"),
             "display_name": data.get("display_name"),
             "dob": data.get("dob"),
         }
-
-
-example_member = {
-    "pk": "HOUSEHOLD#<household_id>",
-    "sk": "MEMBER#<user_id>",
-    "entity": "Member",
-    "household_id": "<household_id>",
-    "user_id": "<user_id>",
-    "role": "OWNER",
-    "date_created": "...",
-    "date_modified": "...",
-}

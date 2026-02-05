@@ -1,9 +1,10 @@
+import json
 from typing import Any, Dict, Optional
 
 from models.auth import AuthUser
 from services.auth_service import AuthService
 from utils.errors import AuthError
-from utils.helper import parse_request_body
+from utils.helper import dict_keys_to_snake_case
 
 
 class BaseController:
@@ -16,14 +17,17 @@ class BaseController:
         self.event = event
         self.auth_service = auth_service or AuthService()
 
-        self.body = parse_request_body(event)
-
+        self.body = self._parse_request_body()
         self.household_id = self._get_household_id()
         self.subject_id = self._get_subject_id()
 
         self.auth_user: Optional[AuthUser] = None
         if require_auth:
             self.auth_user = self._build_auth_user()
+
+    def _parse_request_body(self) -> Dict[str, Any]:
+        body = json.loads(self.event.get("body") or "{}")
+        return dict_keys_to_snake_case(body)
 
     def _build_auth_user(self) -> AuthUser:
         try:

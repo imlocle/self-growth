@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from models.base_model import BaseModel
 
@@ -13,58 +15,66 @@ class HouseholdSubject(BaseModel):
     date_modified: str
 
     entity: str = "Subject"
-    points: float = 0
-    level: int = 1
-    display_name: str | None = None
-    dob: str | None = None
+
+    # Gamification paused: optional, no logic depends on these
+    points: Optional[float] = None
+    level: Optional[int] = None
+
+    display_name: Optional[str] = None
+    dob: Optional[str] = None  # YYYY-MM-DD
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> Dict[str, Any]:
         household_id = data.get("household_id")
-        if household_id is not None:
-            if not isinstance(household_id, str) or not household_id.strip():
-                raise ValueError("household_id is required and must be non-empty")
+        if not isinstance(household_id, str) or not household_id.strip():
+            raise ValueError("household_id is required and must be non-empty")
 
         subject_type = data.get("type")
-        if subject_type is not None:
-            if not isinstance(subject_type, str) or not subject_type.strip():
-                raise ValueError("type is required and must be non-empty")
+        if not isinstance(subject_type, str) or not subject_type.strip():
+            raise ValueError("type is required and must be non-empty")
+
+        points = data.get("points", None)
+        if points is not None and not isinstance(points, (int, float)):
+            raise ValueError("points must be a number if provided")
+
+        level = data.get("level", None)
+        if level is not None and not isinstance(level, int):
+            raise ValueError("level must be an integer if provided")
 
         return {
             "household_id": household_id,
             "type": subject_type,
-            "entity": data.get("entity", "Subject"),
             "display_name": data.get("display_name"),
             "dob": data.get("dob"),
-            "points": data.get("points", 0),
-            "level": data.get("level", 1),
+            "points": float(points) if points is not None else None,
+            "level": int(level) if points is not None else None,
         }
 
+    @classmethod
+    def from_dynamo(cls, item: Dict[str, Any]) -> "HouseholdSubject":
+        return cls(
+            id=item["id"],
+            household_id=item["household_id"],
+            type=item["type"],
+            entity=item.get("entity", "Subject"),
+            display_name=item.get("display_name"),
+            dob=item.get("dob"),
+            points=float(item["points"]) if item.get("points") is not None else None,
+            level=int(item["level"]) if item.get("level") is not None else None,
+            date_created=item["date_created"],
+            date_modified=item["date_modified"],
+        )
 
-# SUBJECT == person being tracked
-example_subject = {
-    "pk": "HOUSEHOLD#<household_id>",
-    "sk": "SUBJECT#<subject_id>",
-    "entity": "Subject",
-    "subject_id": "<subject_id>",
-    "household_id": "<household_id>",
-    "display_name": "Liz",
-    "type": "CHILD",
-    "dob": "2024-01-05",
-    "points": 0.0,
-    "level": 1,
-    "date_created": "...",
-    "date_modified": "...",
-}
-
-
-# points=(
-#     float(item["points"])
-#     if isinstance(item["points"], Decimal)
-#     else item["points"]
-# ),
-# level=(
-#     int(item["level"])
-#     if isinstance(item["level"], Decimal)
-#     else item["level"]
-# ),
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "id": self.id,
+            "entity": self.entity,
+            "household_id": self.household_id,
+            "type": self.type,
+            "display_name": self.display_name,
+            "dob": self.dob,
+            "points": self.points,
+            "level": self.level,
+            "date_created": self.date_created,
+            "date_modified": self.date_modified,
+        }

@@ -41,6 +41,12 @@ class HabitEventTypeEnum(str, Enum):
     RESET = "reset"
 
 
+class HabitEventStatusEnum(str, Enum):
+    DONE = "done"
+    SKIPPED = "skipped"
+    FAILED = "failed"
+
+
 class ToDoStatusEnum(str, Enum):
     ACTIVE = "active"
     COMPLETED = "completed"

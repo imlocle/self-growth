@@ -6,7 +6,7 @@ from services.todo_service import ToDoService
 
 
 class ToDoController(BaseController):
-    def __init__(self, event: Dict[str, Any], todo_service: ToDoService = None):
+    def __init__(self, event: Dict[str, Any], todo_service: ToDoService | None = None):
         super().__init__(event=event, require_auth=True)
 
         self.todo_service = todo_service or ToDoService()
@@ -21,14 +21,16 @@ class ToDoController(BaseController):
         return qs.get(param_str)
 
     def create(self) -> ToDo:
-        data = ToDo.from_dict(
-            {
-                "household_id": self.household_id,
-                "subject_id": self.subject_id,
-                **self.body,
-            }
+        household_id = self.require_household_id()
+        subject_id = self.require_subject_id()
+
+        data = ToDo.from_dict(self.body)
+        return self.todo_service.create(
+            user_id=self.auth_user.user_id,
+            household_id=household_id,
+            subject_id=subject_id,
+            data=data,
         )
-        return self.todo_service.create(user_id=self.auth_user.user_id, data=data)
 
     def get(self) -> ToDo:
         return self.todo_service.get(

@@ -17,23 +17,28 @@ from utils.helper import (
 class ToDoService:
     def __init__(
         self,
-        todo_repo: ToDoRepository = None,
+        todo_repo: ToDoRepository | None = None,
         access_service: AccessService | None = None,
     ):
         self.todo_repo = todo_repo or ToDoRepository()
         self.access = access_service or AccessService()
 
-    def create(self, user_id: str, data: Dict[str, Any]) -> ToDo:
-        timestamp = utc_now_iso()
-        todo = ToDo(
-            id=generate_id(), date_created=timestamp, date_modified=timestamp, **data
+    def create(
+        self, user_id: str, household_id: str, subject_id: str, data: Dict[str, Any]
+    ) -> ToDo:
+        self.access.assert_household_member(user_id=user_id, household_id=household_id)
+        self.access.assert_subject_in_household(
+            household_id=household_id, subject_id=subject_id
         )
 
-        self.access.assert_household_member(
-            user_id=user_id, household_id=todo.household_id
-        )
-        self.access.assert_subject_in_household(
-            household_id=todo.household_id, subject_id=todo.subject_id
+        now = utc_now_iso()
+        todo = ToDo(
+            id=generate_id(),
+            household_id=household_id,
+            subject_id=subject_id,
+            date_created=now,
+            date_modified=now,
+            **data
         )
 
         self.todo_repo.create(todo)
@@ -127,5 +132,4 @@ class ToDoService:
             todo_id=todo_id,
         )
         todo.status = ToDoStatusEnum.DELETED
-
         self.todo_repo.update(todo=todo)
