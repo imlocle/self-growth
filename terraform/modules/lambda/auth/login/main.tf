@@ -79,10 +79,8 @@ resource "aws_lambda_function" "this" {
   filename         = "${path.root}/builds/${local.function_name}.zip"
   source_code_hash = filebase64sha256("${path.root}/builds/${local.function_name}.zip")
 
-  layers = [aws_lambda_layer_version.common_dependencies.arn]
-  depends_on = [null_resource.force_lambda_update,
-    aws_lambda_layer_version.common_dependencies
-  ]
+  layers     = [aws_lambda_layer_version.common_dependencies.arn]
+  depends_on = [aws_lambda_layer_version.common_dependencies]
 
   environment {
     variables = {
@@ -133,18 +131,4 @@ resource "aws_apigatewayv2_route" "this" {
   target    = "integrations/${aws_apigatewayv2_integration.this.id}"
 
   authorization_type = "NONE"
-}
-
-#####################################
-# Trigger a deployment
-#####################################
-
-resource "null_resource" "force_lambda_update" {
-  triggers = {
-    always_run = timestamp()
-  }
-
-  provisioner "local-exec" {
-    command = "touch ${path.root}/builds/${local.function_name}.zip"
-  }
 }

@@ -33,19 +33,25 @@ class ToDoController(BaseController):
         )
 
     def get(self) -> ToDo:
+        household_id = self.require_household_id()
+        subject_id = self.require_subject_id()
+
         return self.todo_service.get(
             user_id=self.auth_user.user_id,
-            household_id=self.household_id,
-            subject_id=self.subject_id,
+            household_id=household_id,
+            subject_id=subject_id,
             todo_id=self.todo_id,
         )
 
     def get_all(self) -> Dict[str, Any]:
+        household_id = self.require_household_id()
+        subject_id = self.require_subject_id()
+
         sort_by = self._get_query_string("sortBy") or "date_modified"
         response = self.todo_service.get_all(
             user_id=self.auth_user.user_id,
-            household_id=self.household_id,
-            subject_id=self.subject_id,
+            household_id=household_id,
+            subject_id=subject_id,
             sort_by=sort_by,
         )
         return {
@@ -54,18 +60,24 @@ class ToDoController(BaseController):
         }
 
     def update(self) -> ToDo:
+        household_id = self.require_household_id()
+        subject_id = self.require_subject_id()
+
         return self.todo_service.update(
             user_id=self.auth_user.user_id,
-            household_id=self.household_id,
-            subject_id=self.subject_id,
+            household_id=household_id,
+            subject_id=subject_id,
             todo_id=self.todo_id,
             data=self.body,
         )
 
     def delete(self) -> None:
+        household_id = self.require_household_id()
+        subject_id = self.require_subject_id()
+
         return self.todo_service.delete(
             user_id=self.auth_user.user_id,
-            household_id=self.household_id,
-            subject_id=self.subject_id,
+            household_id=household_id,
+            subject_id=subject_id,
             todo_id=self.todo_id,
         )

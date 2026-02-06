@@ -7,18 +7,23 @@ class UserProfileService:
     def __init__(self, user_profile_repo: UserProfileRepository = None):
         self.user_profile_repo = user_profile_repo or UserProfileRepository()
 
-    def create(self, user_id: str, data: dict) -> UserProfile:
+    def create(
+        self, user_id: str, household_id: str, subject_id: str, data: dict
+    ) -> UserProfile:
         existing = self.user_profile_repo.get(user_id=user_id)
         if existing:
             raise ValueError("User already has a profile")
 
-        timestamp = utc_now_iso()
-
+        now = utc_now_iso()
         user_profile = UserProfile(
-            id=user_id, date_created=timestamp, date_modified=timestamp, **data
+            id=user_id,
+            household_id=household_id,
+            subject_id=subject_id,
+            date_created=now,
+            date_modified=now,
+            **data
         )
         self.user_profile_repo.create(user_profile)
-
         return user_profile
 
     def get(self, user_id: str) -> UserProfile:

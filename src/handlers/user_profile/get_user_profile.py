@@ -16,8 +16,7 @@ class GetUserProfileHandler:
         except ValueError as e:
             return error_response(message=str(e), status_code=400)
         except Exception as e:
-            print(e)
-            return error_response()
+            return error_response(message=str(e))
 
 
 def lambda_handler(event, context):
