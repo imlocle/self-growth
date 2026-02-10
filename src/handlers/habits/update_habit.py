@@ -1,5 +1,5 @@
 from controllers.habit_controller import HabitController
-from utils.errors import NotFoundError
+from models.errors import NotFoundError
 from utils.response_util import error_response, success_response
 
 

@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional
 
 from models.auth import AuthUser
 from services.auth_service import AuthService
-from utils.errors import AuthError
+from models.errors import AuthorizationError
 from utils.helper import dict_keys_to_snake_case
 
 
@@ -32,7 +32,7 @@ class BaseController:
     def _build_auth_user(self) -> AuthUser:
         try:
             return AuthService.get_auth_user_from_claims(event=self.event)
-        except AuthError:
+        except AuthorizationError:
             return self.auth_service.get_auth_user_from_cognito(event=self.event)
 
     def _get_household_id(self) -> Optional[str]:
@@ -45,10 +45,10 @@ class BaseController:
 
     def require_household_id(self) -> str:
         if not self.household_id:
-            raise AuthError("Missing householdId")
+            raise AuthorizationError("Missing householdId")
         return self.household_id
 
     def require_subject_id(self) -> str:
         if not self.subject_id:
-            raise AuthError("Missing subjectId")
+            raise AuthorizationError("Missing subjectId")
         return self.subject_id

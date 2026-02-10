@@ -2,7 +2,7 @@ from typing import Any, Dict, Optional
 
 from aws.cognito_service import CognitoService
 from models.auth import AuthUser
-from utils.errors import AuthError
+from models.errors import AuthorizationError
 
 
 class AuthService:
@@ -43,7 +43,7 @@ class AuthService:
 
         user_id = claims.get("sub") or claims.get("username")
         if not user_id:
-            raise AuthError("Missing 'sub' claim in JWT")
+            raise AuthorizationError("Missing 'sub' claim in JWT")
 
         return AuthUser(
             user_id=user_id,
@@ -78,7 +78,7 @@ class AuthService:
                 .get("claims", {})
             ) or {}
         except Exception as e:
-            raise AuthError(f"Invalid authorizer context: {e}")
+            raise AuthorizationError(f"Invalid authorizer context: {e}")
 
     @staticmethod
     def get_claim(
@@ -89,12 +89,12 @@ class AuthService:
         """
         Get an arbitrary claim from the JWT (e.g. 'email', 'phone_number').
 
-        If required=True and the claim is missing/empty, raises AuthError.
+        If required=True and the claim is missing/empty, raises AuthorizationError.
         """
         claims = AuthService.get_claims(event)
         value = claims.get(key)
 
         if required and (value is None or value == ""):
-            raise AuthError(f"Missing required claim: '{key}'")
+            raise AuthorizationError(f"Missing required claim: '{key}'")
 
         return value

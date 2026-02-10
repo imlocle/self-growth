@@ -1,5 +1,5 @@
 from controllers.todo_controller import ToDoController
-from utils.errors import NotFoundError
+from models.errors import NotFoundError
 from utils.response_util import error_response, success_response
 
 

@@ -1,6 +1,6 @@
 from controllers.user_profile_controller import UserProfileController
 from utils.response_util import success_response, error_response
-from utils.errors import AuthError
+from models.errors import AuthorizationError
 
 
 class GetUserProfileHandler:
@@ -11,7 +11,7 @@ class GetUserProfileHandler:
         try:
             profile = self.controller.get()
             return success_response(body=profile.to_dict(), status_code=200)
-        except AuthError as e:
+        except AuthorizationError as e:
             return error_response(message=str(e), status_code=401)
         except ValueError as e:
             return error_response(message=str(e), status_code=400)

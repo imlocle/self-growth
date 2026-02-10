@@ -1,6 +1,6 @@
 from controllers.auth_controller import AuthController
 from utils.response_util import success_response, error_response
-from utils.errors import AuthError
+from models.errors import AuthorizationError
 
 
 class LoginHandler:
@@ -11,7 +11,7 @@ class LoginHandler:
         try:
             tokens = self.controller.login()
             return success_response(body=tokens, status_code=200)
-        except AuthError as e:
+        except AuthorizationError as e:
             return error_response(message=str(e), status_code=401)
         except ValueError as e:
             return error_response(message=str(e), status_code=400)

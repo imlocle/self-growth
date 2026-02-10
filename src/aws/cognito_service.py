@@ -9,7 +9,7 @@ from mypy_boto3_cognito_idp.type_defs import (
     GetUserRequestTypeDef,
 )
 
-from utils.errors import AuthError
+from models.errors import AuthorizationError
 
 
 class CognitoService:
@@ -26,17 +26,17 @@ class CognitoService:
             }
             response = self.client.initiate_auth(**params)
         except self.client.exceptions.NotAuthorizedException:
-            raise AuthError("Invalid username or password")
+            raise AuthorizationError("Invalid username or password")
         except self.client.exceptions.UserNotFoundException:
-            raise AuthError("Invalid username or password")
+            raise AuthorizationError("Invalid username or password")
         except self.client.exceptions.UserNotConfirmedException:
-            raise AuthError("User account is not confirmed")
+            raise AuthorizationError("User account is not confirmed")
         except ClientError as e:
-            raise AuthError("Authentication failed") from e
+            raise AuthorizationError("Authentication failed") from e
 
         auth_result = response.get("AuthenticationResult", {})
         if not auth_result:
-            raise AuthError("Authentication failed")
+            raise AuthorizationError("Authentication failed")
 
         return {
             "access_token": auth_result.get("AccessToken"),
@@ -73,13 +73,13 @@ class CognitoService:
             }
             resp = self.client.sign_up(**params)
         except self.client.exceptions.UsernameExistsException:
-            raise AuthError("An account with this email already exists")
+            raise AuthorizationError("An account with this email already exists")
         except self.client.exceptions.InvalidPasswordException as e:
-            raise AuthError("Password does not meet complexity requirements")
+            raise AuthorizationError("Password does not meet complexity requirements")
         except self.client.exceptions.InvalidParameterException as e:
-            raise AuthError("Invalid signup parameters")
+            raise AuthorizationError("Invalid signup parameters")
         except ClientError:
-            raise AuthError("Signup failed")
+            raise AuthorizationError("Signup failed")
 
         return {
             "user_sub": resp.get("UserSub"),
@@ -100,15 +100,15 @@ class CognitoService:
                 ConfirmationCode=confirmation_code,
             )
         except self.client.exceptions.CodeMismatchException:
-            raise AuthError("Invalid confirmation code")
+            raise AuthorizationError("Invalid confirmation code")
         except self.client.exceptions.ExpiredCodeException:
-            raise AuthError("Confirmation code has expired")
+            raise AuthorizationError("Confirmation code has expired")
         except self.client.exceptions.UserNotFoundException:
-            raise AuthError("User not found")
+            raise AuthorizationError("User not found")
         except self.client.exceptions.NotAuthorizedException:
-            raise AuthError("User is already confirmed or cannot be confirmed")
+            raise AuthorizationError("User is already confirmed or cannot be confirmed")
         except ClientError as e:
-            raise AuthError("Confirm signup failed") from e
+            raise AuthorizationError("Confirm signup failed") from e
         print(resp)
         return {
             "message": "Signup confirmed. You can now log in.",
@@ -122,8 +122,8 @@ class CognitoService:
             params: GetUserRequestTypeDef = {"AccessToken": access_token}
             resp = self.client.get_user(**params)
         except self.client.exceptions.NotAuthorizedException:
-            raise AuthError("Invalid or expired access token")
+            raise AuthorizationError("Invalid or expired access token")
         except ClientError as e:
-            raise AuthError("Failed to fetch user from Cognito") from e
+            raise AuthorizationError("Failed to fetch user from Cognito") from e
 
         return resp
