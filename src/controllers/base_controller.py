@@ -1,54 +1,91 @@
-import json
+"""
+Base controller class for request parsing and orchestration.
+Uses shared RequestContext for context extraction.
+"""
+
 from typing import Any, Dict, Optional
 
-from models.auth import AuthUser
-from services.auth_service import AuthService
-from models.errors import AuthorizationError
-from utils.helper import dict_keys_to_snake_case
+from utils.request_context import RequestContext, AuthUser
 
 
 class BaseController:
+    """
+    Base class for all controllers.
+    
+    Uses RequestContext for:
+    - Path parameters
+    - Query parameters
+    - Request body parsing
+    - Authentication
+    
+    The RequestContext can be passed from Handler or created fresh.
+    """
+    
     def __init__(
         self,
         event: Dict[str, Any],
-        auth_service: AuthService = None,
+        request_context: RequestContext = None,
         require_auth: bool = True,
     ):
         self.event = event
-        self.auth_service = auth_service or AuthService()
-
-        self.body = self._parse_request_body()
-        self.household_id = self._get_household_id()
-        self.subject_id = self._get_subject_id()
-
+        
+        # Use provided RequestContext or create new one
+        # This allows Handler to share context with Controller
+        self.request_context = request_context or RequestContext(event)
+        
+        # Convenience aliases from RequestContext
+        self.body = self.request_context.body
+        self.household_id = self.request_context.household_id
+        self.subject_id = self.request_context.subject_id
+        
+        # Authentication
         self.auth_user: Optional[AuthUser] = None
         if require_auth:
-            self.auth_user = self._build_auth_user()
-
-    def _parse_request_body(self) -> Dict[str, Any]:
-        body = json.loads(self.event.get("body") or "{}")
-        return dict_keys_to_snake_case(body)
-
-    def _build_auth_user(self) -> AuthUser:
-        try:
-            return AuthService.get_auth_user_from_claims(event=self.event)
-        except AuthorizationError:
-            return self.auth_service.get_auth_user_from_cognito(event=self.event)
-
-    def _get_household_id(self) -> Optional[str]:
-        path = self.event.get("pathParameters") or {}
-        return path.get("householdId")
-
-    def _get_subject_id(self) -> Optional[str]:
-        path = self.event.get("pathParameters") or {}
-        return path.get("subjectId")
-
+            self.auth_user = self.request_context.require_auth()
+    
+    # =========================================================================
+    # Convenience Properties (Delegated to RequestContext)
+    # =========================================================================
+    
+    @property
+    def user_id(self) -> Optional[str]:
+        """User ID from authenticated user"""
+        return self.auth_user.user_id if self.auth_user else None
+    
+    @property
+    def query_params(self) -> Dict[str, Any]:
+        """Query string parameters"""
+        return self.request_context.query_params
+    
+    @property
+    def path_params(self) -> Dict[str, Any]:
+        """Path parameters"""
+        return self.request_context.path_params
+    
+    # =========================================================================
+    # Require Methods (Delegated to RequestContext)
+    # =========================================================================
+    
     def require_household_id(self) -> str:
-        if not self.household_id:
-            raise AuthorizationError("Missing householdId")
-        return self.household_id
-
+        """Require household ID from path parameters"""
+        return self.request_context.require_household_id()
+    
     def require_subject_id(self) -> str:
-        if not self.subject_id:
-            raise AuthorizationError("Missing subjectId")
-        return self.subject_id
+        """Require subject ID from path parameters"""
+        return self.request_context.require_subject_id()
+    
+    # =========================================================================
+    # Query Parameter Helpers
+    # =========================================================================
+    
+    def get_query_param(self, key: str, default: Optional[str] = None) -> Optional[str]:
+        """Get a query parameter by key"""
+        return self.request_context.get_query_param(key, default)
+    
+    # =========================================================================
+    # Error Logging (Delegated to RequestContext)
+    # =========================================================================
+    
+    def log_error(self, error: Exception, operation: str, **additional_context):
+        """Log error with full request context"""
+        self.request_context.log_error(error, operation, **additional_context)
