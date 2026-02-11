@@ -1,55 +1,73 @@
+"""
+ToDo controller for handling todo-related requests.
+"""
+
 from typing import Any, Dict, Optional
 
 from controllers.base_controller import BaseController
 from models.todo import ToDo
 from services.todo_service import ToDoService
+from utils.request_context import RequestContext
+from utils.validation import validate_todo_data
 
 
 class ToDoController(BaseController):
-    def __init__(self, event: Dict[str, Any], todo_service: ToDoService | None = None):
-        super().__init__(event=event, require_auth=True)
-
+    """Controller for todo operations"""
+    
+    def __init__(
+        self, 
+        event: Dict[str, Any], 
+        request_context: RequestContext = None,
+        todo_service: ToDoService = None
+    ):
+        super().__init__(event=event, request_context=request_context, require_auth=True)
         self.todo_service = todo_service or ToDoService()
-        self.todo_id = self._get_todo_id()
-
-    def _get_todo_id(self) -> Optional[str]:
-        path = self.event.get("pathParameters") or {}
-        return path.get("todoId")
-
-    def _get_query_string(self, param_str: str) -> Optional[str]:
-        qs = self.event.get("queryStringParameters") or {}
-        return qs.get(param_str)
+    
+    @property
+    def todo_id(self) -> Optional[str]:
+        """Todo ID from path parameters"""
+        return self.request_context.todo_id
+    
+    def require_todo_id(self) -> str:
+        """Require todo ID from path parameters"""
+        return self.request_context.require_todo_id()
 
     def create(self) -> ToDo:
+        """Create a new todo"""
         household_id = self.require_household_id()
         subject_id = self.require_subject_id()
 
-        data = ToDo.from_dict(self.body)
+        # Validate input data in Controller
+        validated_data = validate_todo_data(self.body, is_create=True)
+        
         return self.todo_service.create(
-            user_id=self.auth_user.user_id,
+            user_id=self.user_id,
             household_id=household_id,
             subject_id=subject_id,
-            data=data,
+            data=validated_data,
         )
 
     def get(self) -> ToDo:
+        """Get a single todo"""
         household_id = self.require_household_id()
         subject_id = self.require_subject_id()
+        todo_id = self.require_todo_id()
 
         return self.todo_service.get(
-            user_id=self.auth_user.user_id,
+            user_id=self.user_id,
             household_id=household_id,
             subject_id=subject_id,
-            todo_id=self.todo_id,
+            todo_id=todo_id,
         )
 
     def get_all(self) -> Dict[str, Any]:
+        """Get all todos for a subject"""
         household_id = self.require_household_id()
         subject_id = self.require_subject_id()
 
-        sort_by = self._get_query_string("sortBy") or "date_modified"
+        sort_by = self.get_query_param("sortBy", "date_modified")
         response = self.todo_service.get_all(
-            user_id=self.auth_user.user_id,
+            user_id=self.user_id,
             household_id=household_id,
             subject_id=subject_id,
             sort_by=sort_by,
@@ -60,24 +78,31 @@ class ToDoController(BaseController):
         }
 
     def update(self) -> ToDo:
+        """Update an existing todo"""
         household_id = self.require_household_id()
         subject_id = self.require_subject_id()
+        todo_id = self.require_todo_id()
+
+        # Validate input data in Controller (is_create=False for updates)
+        validated_data = validate_todo_data(self.body, is_create=False)
 
         return self.todo_service.update(
-            user_id=self.auth_user.user_id,
+            user_id=self.user_id,
             household_id=household_id,
             subject_id=subject_id,
-            todo_id=self.todo_id,
-            data=self.body,
+            todo_id=todo_id,
+            data=validated_data,
         )
 
     def delete(self) -> None:
+        """Delete a todo"""
         household_id = self.require_household_id()
         subject_id = self.require_subject_id()
+        todo_id = self.require_todo_id()
 
         return self.todo_service.delete(
-            user_id=self.auth_user.user_id,
+            user_id=self.user_id,
             household_id=household_id,
             subject_id=subject_id,
-            todo_id=self.todo_id,
+            todo_id=todo_id,
         )

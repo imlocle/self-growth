@@ -1,27 +1,30 @@
+"""
+Lambda handler for creating todos.
+"""
+
 from typing import Any, Dict
 
 from controllers.todo_controller import ToDoController
-from utils.errors import AuthError, ForbiddenError, NotFoundError
-from utils.response_util import success_response, error_response
+from handlers.base_handler import BaseHandler, lambda_handler_with_errors
+from utils.response_util import success_response
 
 
-class CreateToDoHandler:
+class CreateToDoHandler(BaseHandler):
+    """Handler for POST /households/{householdId}/subjects/{subjectId}/todos"""
+    
     def __init__(self, event: Dict[str, Any]):
-        self.controller = ToDoController(event)
+        super().__init__(event)
+        self.controller = ToDoController(event, request_context=self.request_context)
 
     def handler(self):
-        try:
-            item = self.controller.create()
-            return success_response(body=item.to_dict(), status_code=201)
-        except AuthError as e:
-            return error_response(message=str(e), status_code=401)
-        except ValueError as e:
-            return error_response(message=str(e), status_code=400)
-        except ForbiddenError or NotFoundError as e:
-            return error_response(message=str(e), status_code=404)
-        except Exception as e:
-            return error_response(message=str(e))
+        return self.handle_with_logging("create_todo", self._create_todo)
+    
+    def _create_todo(self):
+        """Create a new todo"""
+        item = self.controller.create()
+        return success_response(body=item.to_dict(), status_code=201)
 
 
+@lambda_handler_with_errors("create_todo")
 def lambda_handler(event, context):
     return CreateToDoHandler(event).handler()
