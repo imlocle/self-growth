@@ -348,3 +348,122 @@ def validate_habit_event_data(data: Dict[str, Any]) -> Dict[str, Any]:
             validated["note"] = ""
 
     return validated
+
+
+def validate_login_data(data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Validate login data.
+
+    Args:
+        data: Input data to validate
+
+    Returns:
+        Validated and normalized data dict
+
+    Raises:
+        ValidationError: If validation fails
+    """
+    validator = Validator()
+    validated = {}
+
+    # Username or email - required
+    username = data.get("username") or data.get("email")
+    if not username:
+        raise MissingRequiredFieldError("username or email")
+
+    validated["username"] = validator.validate_string_length(
+        username, "username", min_length=1, max_length=100
+    )
+
+    # Password - required
+    if "password" not in data:
+        raise MissingRequiredFieldError("password")
+
+    validated["password"] = validator.validate_string_length(
+        data["password"], "password", min_length=1
+    )
+
+    return validated
+
+
+def validate_signup_data(data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Validate signup data.
+
+    Args:
+        data: Input data to validate
+
+    Returns:
+        Validated and normalized data dict
+
+    Raises:
+        ValidationError: If validation fails
+    """
+    validator = Validator()
+    validated = {}
+
+    # Email - required
+    validated["email"] = validator.validate_email(data.get("email", ""))
+
+    # Password - required
+    if "password" not in data:
+        raise MissingRequiredFieldError("password")
+
+    validated["password"] = validator.validate_string_length(
+        data["password"], "password", min_length=8
+    )
+
+    # Phone number - optional
+    if "phone_number" in data and data["phone_number"]:
+        validated["phone_number"] = validator.validate_phone(data["phone_number"])
+    else:
+        validated["phone_number"] = None
+
+    # First name - optional
+    if "first_name" in data and data["first_name"]:
+        validated["first_name"] = validator.validate_string_length(
+            data["first_name"], "first_name", min_length=1, max_length=50
+        )
+    else:
+        validated["first_name"] = None
+
+    # Last name - optional
+    if "last_name" in data and data["last_name"]:
+        validated["last_name"] = validator.validate_string_length(
+            data["last_name"], "last_name", min_length=1, max_length=50
+        )
+    else:
+        validated["last_name"] = None
+
+    return validated
+
+
+def validate_confirm_signup_data(data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Validate confirm signup data.
+
+    Args:
+        data: Input data to validate
+
+    Returns:
+        Validated and normalized data dict
+
+    Raises:
+        ValidationError: If validation fails
+    """
+    validator = Validator()
+    validated = {}
+
+    # Email - required
+    validated["email"] = validator.validate_email(data.get("email", ""))
+
+    # Confirmation code - required
+    if "confirmation_code" not in data:
+        raise MissingRequiredFieldError("confirmation_code")
+
+    validated["confirmation_code"] = validator.validate_string_length(
+        data["confirmation_code"], "confirmation_code", min_length=4, max_length=10
+    )
+
+    return validated
+

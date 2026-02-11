@@ -5,7 +5,8 @@ Uses shared RequestContext for context extraction.
 
 from typing import Any, Dict, Optional
 
-from utils.request_context import RequestContext, AuthUser
+from models.auth import AuthUser
+from utils.request_context import RequestContext
 
 
 class BaseController:

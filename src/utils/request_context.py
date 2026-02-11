@@ -5,26 +5,9 @@ Used by both Handlers (for logging) and Controllers (for business logic).
 
 import json
 from typing import Dict, Any, Optional
-from dataclasses import dataclass, field
+from models.auth import AuthUser
 from utils.error_handler import log_error_with_context
 from utils.helper import to_snake_case
-
-
-@dataclass
-class AuthUser:
-    """Authenticated user information extracted from JWT claims"""
-
-    user_id: str
-    email: Optional[str] = None
-    attributes: Dict[str, Any] = field(default_factory=dict)
-
-    @classmethod
-    def from_claims(cls, claims: Dict[str, Any]) -> Optional["AuthUser"]:
-        """Create AuthUser from JWT claims"""
-        user_id = claims.get("sub") or claims.get("username")
-        if not user_id:
-            return None
-        return cls(user_id=user_id, email=claims.get("email"), attributes=claims)
 
 
 class RequestContext:

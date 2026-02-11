@@ -1,4 +1,8 @@
-from typing import Any, Dict, Optional
+"""
+Auth service for Cognito authentication operations.
+"""
+
+from typing import Any, Dict
 from botocore.exceptions import ClientError
 
 from aws.cognito_service import CognitoService
@@ -12,10 +16,11 @@ from models.errors import (
     EmailConflictError,
 )
 from utils.error_handler import log_error_with_context
-from utils.validation import validate_user_profile_data
 
 
 class AuthService:
+    """Service for authentication operations with AWS Cognito"""
+    
     def __init__(self, cognito_service: CognitoService = None):
         self.cognito_service = cognito_service or CognitoService()
 
@@ -72,7 +77,7 @@ class AuthService:
         phone_number: str | None = None,
         first_name: str | None = None,
         last_name: str | None = None,
-    ):
+    ) -> Dict[str, Any]:
         """
         Register new user with Cognito.
 
@@ -91,17 +96,6 @@ class AuthService:
             CognitoError: Other Cognito errors
         """
         try:
-            # Validate input data
-            user_data = {
-                "email": email,
-                "phone_number": phone_number,
-                "first_name": first_name,
-                "last_name": last_name,
-            }
-            # Remove None values
-            user_data = {k: v for k, v in user_data.items() if v is not None}
-            validate_user_profile_data(user_data)
-
             return self.cognito_service.sign_up(
                 email=email,
                 phone_number=phone_number,
@@ -177,116 +171,42 @@ class AuthService:
                 original_error=str(e),
             )
 
-    def get_auth_user_from_cognito(self, event: Dict[str, Any]) -> AuthUser:
-        response = self.cognito_service.get_user(
-            access_token=self.get_access_token(event=event)
-        )
-        return AuthUser.from_cognito(response)
-
-    @staticmethod
-    def get_auth_user_from_claims(event: Dict[str, Any]) -> AuthUser:
+    def get_user_from_cognito(self, access_token: str) -> AuthUser:
         """
-        Extract user information from JWT claims.
+        Fetch user details from Cognito using access token.
+        
+        This is used when JWT claims don't contain all needed user attributes
+        (e.g., email not in claims but needed for user profile creation).
 
         Args:
-            event: API Gateway event
+            access_token: Cognito access token
 
         Returns:
-            AuthUser object
+            AuthUser with full user details from Cognito
 
         Raises:
-            AuthenticationError: Missing or invalid claims
+            CognitoError: If Cognito API call fails
         """
         try:
-            claims = AuthService.get_claims(event)
+            response = self.cognito_service.get_user(access_token=access_token)
+            return AuthUser.from_cognito(response)
+        except ClientError as e:
+            error_code = e.response["Error"]["Code"]
+            error_message = e.response["Error"]["Message"]
 
-            user_id = claims.get("sub") or claims.get("username")
-            if not user_id:
-                raise AuthenticationError("Missing 'sub' claim in JWT")
+            log_error_with_context(
+                e, operation="cognito_get_user", error_code=error_code
+            )
 
-            return AuthUser(
-                user_id=user_id,
-                attributes=claims,
+            raise CognitoError(
+                message=f"Failed to get user from Cognito: {error_message}",
+                operation="get_user",
+                original_error=str(e),
             )
         except Exception as e:
-            log_error_with_context(e, operation="get_auth_user_from_claims")
-            raise AuthenticationError("Failed to extract user from JWT claims")
-
-    @staticmethod
-    def get_access_token(event: Dict[str, Any]) -> str:
-        """
-        Extract access token from Authorization header.
-
-        Args:
-            event: API Gateway event
-
-        Returns:
-            Access token string
-
-        Raises:
-            AuthenticationError: Missing or invalid Authorization header
-        """
-        headers = event.get("headers") or {}
-        auth_header: str = headers.get("authorization") or headers.get("Authorization")
-
-        if not auth_header:
-            raise AuthenticationError("Missing Authorization header")
-
-        parts = auth_header.split()
-        if len(parts) == 2 and parts[0].lower() == "bearer":
-            return parts[1]
-
-        return auth_header
-
-    @staticmethod
-    def get_claims(event: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Extract JWT claims from an API Gateway HTTP API event
-        when using a Cognito JWT authorizer.
-
-        Args:
-            event: API Gateway event
-
-        Returns:
-            JWT claims dictionary
-
-        Raises:
-            AuthenticationError: Invalid authorizer context
-        """
-        try:
-            return (
-                event.get("requestContext", {})
-                .get("authorizer", {})
-                .get("jwt", {})
-                .get("claims", {})
-            ) or {}
-        except Exception as e:
-            raise AuthenticationError(f"Invalid authorizer context: {e}")
-
-    @staticmethod
-    def get_claim(
-        event: Dict[str, Any],
-        key: str,
-        required: bool = False,
-    ) -> Optional[str]:
-        """
-        Get an arbitrary claim from the JWT (e.g. 'email', 'phone_number').
-
-        Args:
-            event: API Gateway event
-            key: Claim key to retrieve
-            required: Whether the claim is required
-
-        Returns:
-            Claim value or None
-
-        Raises:
-            AuthenticationError: Missing required claim
-        """
-        claims = AuthService.get_claims(event)
-        value = claims.get(key)
-
-        if required and (value is None or value == ""):
-            raise AuthenticationError(f"Missing required claim: '{key}'")
-
-        return value
+            log_error_with_context(e, operation="cognito_get_user")
+            raise CognitoError(
+                message="Unexpected error fetching user from Cognito",
+                operation="get_user",
+                original_error=str(e),
+            )

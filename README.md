@@ -17,16 +17,34 @@ pip install -r src/requirements.txt
 
 ## Deployment
 
+Usage:
+
 ```bash
-make clean && make deploy ENV=dev
+make deploy ENV=dev
 ```
 
-### Update Lambda
+Force Rebuild Layer:
 
 ```bash
-# 1) Just re-zip one lambda
-make zip-create-todo ENV=dev
+make rebuild-layer ENV=dev
+```
 
-# 2) Re-deploy with terraform
-terraform -chdir=terraform apply -var="environment=dev" -auto-approve
+Full Reset:
+
+```bash
+make nuke && make deploy ENV=dev
+```
+
+## Update Lambda
+
+Build only one Lambda zip:
+
+```bash
+make zip-create-todo ENV=dev
+```
+
+Deploy only one Lambda (build its zip, then terraform apply):
+
+```bash
+make deploy-create-todo ENV=dev
 ```
