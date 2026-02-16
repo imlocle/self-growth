@@ -5,6 +5,8 @@ Error handling utilities for consistent error responses across the application.
 import json
 import traceback
 from typing import Dict, Any, Tuple
+
+from utils.response_util import CORS_HEADERS
 from models.errors import (
     BaseError,
     ValidationError,
@@ -73,12 +75,7 @@ def create_error_response(status_code: int, error_body: str) -> Dict[str, Any]:
     """
     return {
         "statusCode": status_code,
-        "headers": {
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Headers": "Content-Type,Authorization",
-            "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
-        },
+        "headers": {**CORS_HEADERS},
         "body": error_body,
     }
 
