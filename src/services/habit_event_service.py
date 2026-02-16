@@ -91,3 +91,56 @@ class HabitEventService:
 
         # default fallback
         return now.strftime("%Y-%m-%d")
+    def get(
+        self,
+        user_id: str,
+        household_id: str,
+        subject_id: str,
+        habit_id: str,
+        period_key: str,
+    ) -> HabitEvent:
+        """Get a single habit event by period key."""
+        self.access.assert_household_member(user_id=user_id, household_id=household_id)
+        self.access.assert_subject_in_household(
+            household_id=household_id, subject_id=subject_id
+        )
+
+        item = self.event_repo.get(
+            household_id=household_id,
+            subject_id=subject_id,
+            habit_id=habit_id,
+            period_key=period_key,
+        )
+        if not item:
+            raise NotFoundError(
+                message="Habit event not found",
+                resource_type="habit_event",
+                resource_id=f"{habit_id}:{period_key}",
+            )
+        return HabitEvent.from_dynamo(item)
+
+    def get_all(
+        self,
+        user_id: str,
+        household_id: str,
+        subject_id: str,
+        habit_id: str,
+    ) -> dict:
+        """Get all habit events for a habit."""
+        self.access.assert_household_member(user_id=user_id, household_id=household_id)
+        self.access.assert_subject_in_household(
+            household_id=household_id, subject_id=subject_id
+        )
+
+        response = self.event_repo.get_all(
+            household_id=household_id,
+            subject_id=subject_id,
+            habit_id=habit_id,
+        )
+        items = [HabitEvent.from_dynamo(i) for i in response.get("items", [])]
+        return {
+            "items": items,
+            "lastEvaluatedKey": response.get("lastEvaluatedKey"),
+        }
+
+

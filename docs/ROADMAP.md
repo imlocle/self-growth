@@ -1,7 +1,7 @@
 # Self-Growth Backend Roadmap
 
-**Last Updated**: February 13, 2026  
-**Current Status**: MVP Foundation Complete → Production Readiness Phase
+**Last Updated**: February 16, 2026  
+**Current Status**: Phase 2 In Progress — Household & Subject APIs Complete
 
 This document outlines the journey from current state to a production-ready mobile backend application.
 
@@ -38,6 +38,7 @@ Build a production-ready mobile backend that supports:
 - [x] User signup with email verification
 - [x] User login with token generation
 - [x] Signup confirmation flow
+- [x] Token refresh endpoint
 - [x] Household membership validation
 - [x] Subject ownership validation
 - [x] Path parameter spoofing prevention
@@ -100,88 +101,85 @@ Build a production-ready mobile backend that supports:
 
 ### Critical Missing Features
 
-#### 1. Household & Subject Management APIs 🔴 HIGH PRIORITY
+#### 1. Household & Subject Management APIs ✅ COMPLETE
 
-**Status**: Models exist, but no Lambda handlers
+**Status**: All 13 endpoints implemented with full end-to-end Lambda handlers, controllers, services, repositories, validation, and Terraform IaC.
 
-**Required Endpoints**:
+**Implemented Endpoints**:
 
 ```
-POST   /households                    # Create household
-GET    /households/{id}               # Get household details
-GET    /households                    # List user's households
-PUT    /households/{id}               # Update household
-DELETE /households/{id}               # Delete household (soft delete)
+POST   /households                    # Create household          ✅
+GET    /households/{id}               # Get household details     ✅
+GET    /households                    # List user's households    ✅
+PUT    /households/{id}               # Update household          ✅
+DELETE /households/{id}               # Delete household          ✅
 
-POST   /households/{id}/members       # Add member to household
-GET    /households/{id}/members       # List household members
-DELETE /households/{id}/members/{uid} # Remove member
+POST   /households/{id}/members       # Add member to household   ✅
+GET    /households/{id}/members       # List household members    ✅
+DELETE /households/{id}/members/{uid} # Remove member             ✅
 
-POST   /households/{id}/subjects      # Create subject
-GET    /households/{id}/subjects/{id} # Get subject details
-GET    /households/{id}/subjects      # List household subjects
-PUT    /households/{id}/subjects/{id} # Update subject
-DELETE /households/{id}/subjects/{id} # Delete subject (soft delete)
+POST   /households/{id}/subjects      # Create subject            ✅
+GET    /households/{id}/subjects/{id} # Get subject details       ✅
+GET    /households/{id}/subjects      # List household subjects   ✅
+PUT    /households/{id}/subjects/{id} # Update subject            ✅
+DELETE /households/{id}/subjects/{id} # Delete subject            ✅
 ```
 
-**Why Critical**: Mobile app cannot function without ability to create/manage households and subjects.
+**Completed Work**:
 
-**Estimated Effort**: 3-5 days
-
-- Create 11 Lambda handlers
-- Create controllers for household, household_member, household_subject
-- Services already exist (need verification)
-- Repositories already exist (need verification)
-- Add Terraform Lambda configurations
-- Add API Gateway routes
-- Write tests
+- [x] 13 Lambda handlers (households: 5, members: 3, subjects: 5)
+- [x] 3 controllers (HouseholdController, HouseholdMemberController, HouseholdSubjectController)
+- [x] Services expanded with full CRUD + access control (HouseholdService, HouseholdMemberService, HouseholdSubjectService)
+- [x] Repositories expanded with get_all, update, delete methods
+- [x] Models updated with from_dynamo/to_dict methods
+- [x] Validation functions (validate_household_data, validate_household_member_data, validate_household_subject_data)
+- [x] Terraform Lambda configurations (13 child modules across 3 groups)
+- [x] API Gateway routes with JWT authorization
+- [ ] Write tests
 
 ---
 
-#### 2. Habit Event Listing & History 🔴 HIGH PRIORITY
+#### 2. Habit Event Listing & History ✅ COMPLETE
 
-**Status**: Can create events, but cannot retrieve them
+**Status**: Full CRUD implemented — create, get single event by period key, list all events for a habit.
 
-**Required Endpoints**:
+**Implemented Endpoints**:
 
 ```
-GET /households/{id}/subjects/{id}/habits/{id}/events
-  ?startDate=2026-01-01
-  &endDate=2026-02-13
-  &status=done,skipped
-
-GET /households/{id}/subjects/{id}/habits/{id}/events/{periodKey}
+POST /households/{id}/subjects/{id}/habits/{id}/events                  # Create event    ✅
+GET  /households/{id}/subjects/{id}/habits/{id}/events                  # List events     ✅
+GET  /households/{id}/subjects/{id}/habits/{id}/events/{periodKey}      # Get event       ✅
 ```
 
-**Why Critical**: Mobile app needs to display habit history, streaks, and analytics.
+**Completed Work**:
 
-**Estimated Effort**: 2-3 days
-
-- Create 2 Lambda handlers (list, get)
-- Add query parameter filtering
-- Implement date range queries
-- Add pagination support
-- Update HabitEventRepository with query methods
+- [x] Refactored create handler to BaseHandler pattern
+- [x] Added get and get_all to repository, service, controller, handlers
+- [x] HabitEventController with require_period_key, require_habit_id
+- [x] Terraform Lambda configurations (2 new child modules)
+- [x] API Gateway routes with JWT authorization
+- [ ] Date range filtering (future enhancement)
+- [ ] Pagination support (future enhancement)
 
 ---
 
-#### 3. Update User Profile 🟡 MEDIUM PRIORITY
+#### 3. Update User Profile ✅ COMPLETE
 
-**Status**: Can create and get, but cannot update
+**Status**: UserProfileController refactored to pure CRUD (create, get, update). Household orchestration removed — handled by dedicated HouseholdController.
 
-**Required Endpoints**:
+**Implemented Endpoints**:
 
 ```
-PUT /user-profile  # Update profile (username, email, phone, etc.)
+POST /user-profile  # Create profile   ✅
+GET  /user-profile  # Get profile      ✅
+PUT  /user-profile  # Update profile   ✅
 ```
 
-**Why Important**: Users need to update their profile information.
+**Completed Work**:
 
-**Estimated Effort**: 1 day
-
-- Create update Lambda handler
-- Add validation for profile updates
-- Handle username/email uniqueness checks
+- [x] UserProfileController cleaned up to CRUD-only
+- [x] UserProfileService update method with validation
+- [x] Type safety fixes (Optional params, require_auth pattern)
 
 ---
 
@@ -508,9 +506,9 @@ Response: { "status": "healthy", "version": "1.0.0", "timestamp": "..." }
 
 ### Sprint 1: Critical APIs (2 weeks)
 
-1. Household management APIs (5 days)
-2. Subject management APIs (3 days)
-3. Habit event listing (2 days)
+1. ~~Household management APIs (5 days)~~ ✅
+2. ~~Subject management APIs (3 days)~~ ✅
+3. ~~Habit event listing (2 days)~~ ✅
 4. CORS configuration (1 day)
 5. API documentation (3 days)
 
@@ -520,7 +518,7 @@ Response: { "status": "healthy", "version": "1.0.0", "timestamp": "..." }
 
 ### Sprint 2: Completeness & Polish (2 weeks)
 
-1. User profile update (1 day)
+1. ~~User profile update (1 day)~~ ✅
 2. Habit deletion (1 day)
 3. Pagination & filtering (4 days)
 4. Input sanitization (2 days)
@@ -560,7 +558,7 @@ A production-ready mobile backend must have:
 ### Functional Completeness ✅
 
 - [x] All core entities (User, Household, Subject, ToDo, Habit, HabitEvent, Blog)
-- [ ] All CRUD operations for each entity
+- [x] All CRUD operations for each entity (except Habit delete)
 - [ ] Habit analytics and streaks
 - [ ] Pagination and filtering
 
@@ -605,18 +603,19 @@ A production-ready mobile backend must have:
 
 ## 📊 Current Progress
 
-**Overall Completion**: ~60%
+**Overall Completion**: ~75%
 
 | Category             | Progress | Status                         |
 | -------------------- | -------- | ------------------------------ |
 | Core Architecture    | 100%     | ✅ Complete                    |
-| Authentication       | 100%     | ✅ Complete                    |
-| User Management      | 70%      | 🟡 Missing update              |
-| Household Management | 40%      | 🔴 Missing APIs                |
-| Subject Management   | 40%      | 🔴 Missing APIs                |
+| Authentication       | 100%     | ✅ Complete (incl. refresh)    |
+| User Management      | 100%     | ✅ Complete                    |
+| Household Management | 100%     | ✅ Complete                    |
+| Subject Management   | 100%     | ✅ Complete                    |
+| Member Management    | 100%     | ✅ Complete                    |
 | ToDo Features        | 100%     | ✅ Complete                    |
 | Habit Features       | 80%      | 🟡 Missing delete, analytics   |
-| Habit Events         | 50%      | 🔴 Missing list/get            |
+| Habit Events         | 100%     | ✅ Complete                    |
 | Blog Features        | 100%     | ✅ Complete                    |
 | Security             | 70%      | 🟡 Missing rate limiting, CORS |
 | Testing              | 10%      | 🔴 Minimal tests               |
@@ -640,7 +639,6 @@ A production-ready mobile backend must have:
 - Test coverage is too low (needs immediate attention)
 - API documentation should be generated from code
 - Monitoring and alerting need enhancement
-- Some entity management APIs are missing
 
 ### Architectural Decisions to Maintain
 
@@ -656,10 +654,11 @@ A production-ready mobile backend must have:
 
 ### Immediate Actions (This Week)
 
-1. **Create household management Lambda handlers** (5 endpoints)
-2. **Create subject management Lambda handlers** (5 endpoints)
-3. **Add habit event listing** (2 endpoints)
+1. ~~**Create household management Lambda handlers** (5 endpoints)~~ ✅
+2. ~~**Create subject management Lambda handlers** (5 endpoints)~~ ✅
+3. ~~**Add habit event listing** (2 endpoints)~~ ✅
 4. **Configure CORS** for mobile app
+5. **Add habit deletion endpoint**
 
 ### Short Term (Next 2 Weeks)
 

@@ -1,36 +1,88 @@
-from typing import Any, Dict
+"""
+Habit event controller for handling habit event requests.
+"""
+
+from typing import Any, Dict, Optional
 
 from controllers.base_controller import BaseController
 from models.habit_event import HabitEvent
 from services.habit_event_service import HabitEventService
+from utils.request_context import RequestContext
+from utils.validation import validate_habit_event_data
 
 
 class HabitEventController(BaseController):
+    """Controller for habit event operations"""
+
     def __init__(
         self,
         event: Dict[str, Any],
-        habit_event_service: HabitEventService | None = None,
+        request_context: Optional[RequestContext] = None,
+        habit_event_service: Optional[HabitEventService] = None,
     ):
-        super().__init__(event=event, require_auth=True)
+        super().__init__(event=event, request_context=request_context, require_auth=True)
         self.habit_event_service = habit_event_service or HabitEventService()
-        self.habit_id = self._get_habit_id()
 
-    def _get_habit_id(self) -> str:
-        path = self.event.get("pathParameters") or {}
-        habit_id = path.get("habitId")
-        if not habit_id:
-            raise ValueError("Missing habitId in path")
-        return habit_id
+    @property
+    def period_key(self) -> Optional[str]:
+        """Period key from path parameters"""
+        return self.path_params.get("periodKey")
+
+    def require_period_key(self) -> str:
+        if not self.period_key:
+            from models.errors import ValidationError
+            raise ValidationError(
+                "Missing required path parameter: periodKey", field="periodKey"
+            )
+        return self.period_key
 
     def create(self) -> HabitEvent:
+        """Create a new habit event"""
         household_id = self.require_household_id()
         subject_id = self.require_subject_id()
+        habit_id = self.request_context.require_habit_id()
+        auth_user = self.request_context.require_auth()
 
-        data = HabitEvent.from_dict(self.body)  # status/note validation only
+        validated_data = validate_habit_event_data(self.body)
+
         return self.habit_event_service.create(
-            user_id=self.auth_user.user_id,
+            user_id=auth_user.user_id,
             household_id=household_id,
             subject_id=subject_id,
-            habit_id=self.habit_id,
-            data=data,
+            habit_id=habit_id,
+            data=validated_data,
         )
+
+    def get(self) -> HabitEvent:
+        """Get a single habit event by period key"""
+        household_id = self.require_household_id()
+        subject_id = self.require_subject_id()
+        habit_id = self.request_context.require_habit_id()
+        period_key = self.require_period_key()
+        auth_user = self.request_context.require_auth()
+
+        return self.habit_event_service.get(
+            user_id=auth_user.user_id,
+            household_id=household_id,
+            subject_id=subject_id,
+            habit_id=habit_id,
+            period_key=period_key,
+        )
+
+    def get_all(self) -> Dict[str, Any]:
+        """Get all habit events for a habit"""
+        household_id = self.require_household_id()
+        subject_id = self.require_subject_id()
+        habit_id = self.request_context.require_habit_id()
+        auth_user = self.request_context.require_auth()
+
+        response = self.habit_event_service.get_all(
+            user_id=auth_user.user_id,
+            household_id=household_id,
+            subject_id=subject_id,
+            habit_id=habit_id,
+        )
+        return {
+            "items": [e.to_dict() for e in response.get("items", [])],
+            "lastEvaluatedKey": response.get("lastEvaluatedKey"),
+        }

@@ -4,6 +4,7 @@ from botocore.exceptions import ClientError
 
 from mypy_boto3_dynamodb.type_defs import (
     PutItemInputTablePutItemTypeDef,
+    GetItemInputTableGetItemTypeDef,
     QueryInputTableQueryTypeDef,
 )
 
@@ -116,3 +117,16 @@ class HabitEventRepository(BaseRepository):
                 operation="query",
                 original_error=str(e)
             )
+    def get(
+        self, household_id: str, subject_id: str, habit_id: str, period_key: str
+    ) -> Dict[str, Any] | None:
+        """Get a single habit event by period key."""
+        get_params: GetItemInputTableGetItemTypeDef = {
+            "Key": {
+                "pk": self.household_pk(household_id),
+                "sk": f"{self.subject_sk(subject_id)}#HABIT#{habit_id}#EVENT#{period_key}",
+            }
+        }
+        return self.dynamodb_service.get(get_params)
+
+
