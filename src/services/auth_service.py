@@ -210,3 +210,44 @@ class AuthService:
                 operation="get_user",
                 original_error=str(e),
             )
+    def refresh_token(self, refresh_token: str) -> Dict[str, Any]:
+        """
+        Refresh authentication tokens using a refresh token.
+
+        Args:
+            refresh_token: Cognito refresh token
+
+        Returns:
+            New authentication tokens
+
+        Raises:
+            InvalidCredentialsError: Refresh token invalid or expired
+            CognitoError: Other Cognito errors
+        """
+        try:
+            return self.cognito_service.refresh_auth(refresh_token=refresh_token)
+        except ClientError as e:
+            error_code = e.response["Error"]["Code"]
+            error_message = e.response["Error"]["Message"]
+
+            log_error_with_context(
+                e, operation="cognito_refresh_token", error_code=error_code
+            )
+
+            if error_code == "NotAuthorizedException":
+                raise InvalidCredentialsError()
+            else:
+                raise CognitoError(
+                    message=f"Token refresh failed: {error_message}",
+                    operation="refresh_token",
+                    original_error=str(e),
+                )
+        except Exception as e:
+            log_error_with_context(e, operation="cognito_refresh_token")
+            raise CognitoError(
+                message="Unexpected error during token refresh",
+                operation="refresh_token",
+                original_error=str(e),
+            )
+
+

@@ -127,3 +127,31 @@ class CognitoService:
             raise AuthorizationError("Failed to fetch user from Cognito") from e
 
         return resp
+    def refresh_auth(self, refresh_token: str) -> Dict[str, Any]:
+        """
+        Refresh authentication tokens using a refresh token.
+        """
+        try:
+            params: InitiateAuthRequestTypeDef = {
+                "AuthFlow": "REFRESH_TOKEN_AUTH",
+                "AuthParameters": {"REFRESH_TOKEN": refresh_token},
+                "ClientId": self.client_id,
+            }
+            response = self.client.initiate_auth(**params)
+        except self.client.exceptions.NotAuthorizedException:
+            raise AuthorizationError("Refresh token is invalid or expired")
+        except ClientError as e:
+            raise AuthorizationError("Token refresh failed") from e
+
+        auth_result = response.get("AuthenticationResult", {})
+        if not auth_result:
+            raise AuthorizationError("Token refresh failed")
+
+        return {
+            "access_token": auth_result.get("AccessToken"),
+            "id_token": auth_result.get("IdToken"),
+            "expires_in": auth_result.get("ExpiresIn"),
+            "token_type": auth_result.get("TokenType"),
+        }
+
+

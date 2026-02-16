@@ -5,7 +5,7 @@ Error handling utilities for consistent error responses across the application.
 import json
 import traceback
 from typing import Dict, Any, Tuple
-from src.models.errors import (
+from models.errors import (
     BaseError,
     ValidationError,
     AuthorizationError,

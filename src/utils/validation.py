@@ -5,7 +5,7 @@ Validation utilities with enhanced error handling.
 import re
 from typing import Any, List, Dict, Optional
 from datetime import datetime, date
-from src.models.errors import (
+from models.errors import (
     ValidationError,
     InvalidUsernameError,
     InvalidEmailError,
@@ -466,4 +466,31 @@ def validate_confirm_signup_data(data: Dict[str, Any]) -> Dict[str, Any]:
     )
 
     return validated
+
+def validate_refresh_token_data(data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Validate refresh token data.
+
+    Args:
+        data: Input data to validate
+
+    Returns:
+        Validated data dict
+
+    Raises:
+        ValidationError: If validation fails
+    """
+    if not data or "refresh_token" not in data:
+        raise MissingRequiredFieldError("refresh_token")
+
+    validator = Validator()
+    validated = {}
+
+    validated["refresh_token"] = validator.validate_string_length(
+        data["refresh_token"], "refresh_token", min_length=1
+    )
+
+    return validated
+
+
 

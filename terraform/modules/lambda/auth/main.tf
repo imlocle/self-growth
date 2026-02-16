@@ -30,3 +30,14 @@ module "confirm_signup" {
   api_id            = var.api_id
   cognito_client_id = var.cognito_client_id
 }
+module "refresh_token" {
+  source            = "./refresh_token"
+  environment       = var.environment
+  project_name      = var.project_name
+  runtime           = var.runtime
+  lambda_name       = "refresh-token"
+  api_execution_arn = var.api_execution_arn
+  api_id            = var.api_id
+  cognito_client_id = var.cognito_client_id
+}
+

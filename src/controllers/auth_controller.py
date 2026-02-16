@@ -7,7 +7,7 @@ from typing import Any, Dict
 from controllers.base_controller import BaseController
 from services.auth_service import AuthService
 from utils.request_context import RequestContext
-from utils.validation import validate_login_data, validate_signup_data, validate_confirm_signup_data
+from utils.validation import validate_login_data, validate_signup_data, validate_confirm_signup_data, validate_refresh_token_data
 
 
 class AuthController(BaseController):
@@ -69,3 +69,17 @@ class AuthController(BaseController):
             email=validated_data["email"], 
             confirmation_code=validated_data["confirmation_code"]
         )
+    def refresh_token(self) -> Dict[str, Any]:
+        """
+        Refresh authentication tokens using refresh token.
+
+        Returns:
+            New authentication tokens
+        """
+        validated_data = validate_refresh_token_data(self.body)
+
+        return self.auth_service.refresh_token(
+            refresh_token=validated_data["refresh_token"],
+        )
+
+
