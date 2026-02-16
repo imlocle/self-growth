@@ -183,23 +183,22 @@ PUT  /user-profile  # Update profile   ✅
 
 ---
 
-#### 4. Habit Deletion 🟡 MEDIUM PRIORITY
+#### 4. Habit Deletion ✅ COMPLETE
 
-**Status**: Update exists, but no delete endpoint
+**Status**: Soft delete implemented (sets status to DELETED).
 
-**Required Endpoints**:
+**Implemented Endpoint**:
 
 ```
-DELETE /households/{id}/subjects/{id}/habits/{id}
+DELETE /households/{id}/subjects/{id}/habits/{id}   # Delete habit   ✅
 ```
 
-**Why Important**: Users need to remove habits they no longer track.
+**Completed Work**:
 
-**Estimated Effort**: 1 day
-
-- Create delete Lambda handler
-- Implement soft delete (status = deleted)
-- Consider cascade delete for habit events (or keep for history)
+- [x] Delete handler with BaseHandler pattern
+- [x] Controller and service already had delete methods (bug fix: removed stray `user_id` kwarg)
+- [x] Terraform Lambda configuration with API Gateway route
+- [x] Soft delete preserves habit event history
 
 ---
 
@@ -519,7 +518,7 @@ Response: { "status": "healthy", "version": "1.0.0", "timestamp": "..." }
 ### Sprint 2: Completeness & Polish (2 weeks)
 
 1. ~~User profile update (1 day)~~ ✅
-2. Habit deletion (1 day)
+2. ~~Habit deletion (1 day)~~ ✅
 3. Pagination & filtering (4 days)
 4. Input sanitization (2 days)
 5. Rate limiting (2 days)
@@ -558,8 +557,8 @@ A production-ready mobile backend must have:
 ### Functional Completeness ✅
 
 - [x] All core entities (User, Household, Subject, ToDo, Habit, HabitEvent, Blog)
-- [x] All CRUD operations for each entity (except Habit delete)
-- [ ] Habit analytics and streaks
+- [x] All CRUD operations for each entity
+- [ ] Habit analytics and streaks (deferred — separate project)
 - [ ] Pagination and filtering
 
 ### Security ✅
@@ -603,24 +602,24 @@ A production-ready mobile backend must have:
 
 ## 📊 Current Progress
 
-**Overall Completion**: ~75%
+**Overall Completion**: ~80%
 
-| Category             | Progress | Status                       |
-| -------------------- | -------- | ---------------------------- |
-| Core Architecture    | 100%     | ✅ Complete                  |
-| Authentication       | 100%     | ✅ Complete (incl. refresh)  |
-| User Management      | 100%     | ✅ Complete                  |
-| Household Management | 100%     | ✅ Complete                  |
-| Subject Management   | 100%     | ✅ Complete                  |
-| Member Management    | 100%     | ✅ Complete                  |
-| ToDo Features        | 100%     | ✅ Complete                  |
-| Habit Features       | 80%      | 🟡 Missing delete, analytics |
-| Habit Events         | 100%     | ✅ Complete                  |
-| Blog Features        | 100%     | ✅ Complete                  |
-| Security             | 80%      | 🟡 Missing rate limiting     |
-| Testing              | 10%      | 🔴 Minimal tests             |
-| Monitoring           | 40%      | 🟡 Basic logging only        |
-| Documentation        | 60%      | 🟡 Missing API docs          |
+| Category             | Progress | Status                      |
+| -------------------- | -------- | --------------------------- |
+| Core Architecture    | 100%     | ✅ Complete                 |
+| Authentication       | 100%     | ✅ Complete (incl. refresh) |
+| User Management      | 100%     | ✅ Complete                 |
+| Household Management | 100%     | ✅ Complete                 |
+| Subject Management   | 100%     | ✅ Complete                 |
+| Member Management    | 100%     | ✅ Complete                 |
+| ToDo Features        | 100%     | ✅ Complete                 |
+| Habit Features       | 100%     | ✅ Complete                 |
+| Habit Events         | 100%     | ✅ Complete                 |
+| Blog Features        | 100%     | ✅ Complete                 |
+| Security             | 80%      | 🟡 Missing rate limiting    |
+| Testing              | 10%      | 🔴 Minimal tests            |
+| Monitoring           | 40%      | 🟡 Basic logging only       |
+| Documentation        | 60%      | 🟡 Missing API docs         |
 
 ---
 
@@ -658,7 +657,7 @@ A production-ready mobile backend must have:
 2. ~~**Create subject management Lambda handlers** (5 endpoints)~~ ✅
 3. ~~**Add habit event listing** (2 endpoints)~~ ✅
 4. ~~**Configure CORS** for mobile app~~ ✅
-5. **Add habit deletion endpoint**
+5. ~~**Add habit deletion endpoint**~~ ✅
 
 ### Short Term (Next 2 Weeks)
 

@@ -109,4 +109,4 @@ class HabitService:
             habit_id=habit_id,
         )
         habit.status = HabitStatusEnum.DELETED
-        self.habit_repo.update(user_id=user_id, habit=habit)
+        self.habit_repo.update(habit=habit)

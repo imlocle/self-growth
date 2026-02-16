@@ -6,8 +6,8 @@ from services.habit_service import HabitService
 
 
 class HabitController(BaseController):
-    def __init__(self, event: Dict[str, Any], habit_service: HabitService = None):
-        super().__init__(event=event, require_auth=True)
+    def __init__(self, event: Dict[str, Any], request_context=None, habit_service: HabitService = None):
+        super().__init__(event=event, request_context=request_context, require_auth=True)
 
         self.habit_service = habit_service or HabitService()
         self.habit_id = self._get_habit_id()
