@@ -41,3 +41,13 @@ class Household(BaseModel):
             date_created=item["date_created"],
             date_modified=item["date_modified"],
         )
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "id": self.id,
+            "name": self.name,
+            "owner_user_id": self.owner_user_id,
+            "entity": self.entity,
+            "date_created": self.date_created,
+            "date_modified": self.date_modified,
+        }
+

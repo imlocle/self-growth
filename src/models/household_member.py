@@ -40,3 +40,28 @@ class HouseholdMember(BaseModel):
             "display_name": data.get("display_name"),
             "dob": data.get("dob"),
         }
+    @classmethod
+    def from_dynamo(cls, item: Dict[str, Any]) -> "HouseholdMember":
+        return cls(
+            household_id=item["household_id"],
+            user_id=item["user_id"],
+            role=item["role"],
+            entity=item.get("entity", "Member"),
+            display_name=item.get("display_name"),
+            dob=item.get("dob"),
+            date_created=item["date_created"],
+            date_modified=item["date_modified"],
+        )
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "household_id": self.household_id,
+            "user_id": self.user_id,
+            "role": self.role,
+            "entity": self.entity,
+            "display_name": self.display_name,
+            "dob": self.dob,
+            "date_created": self.date_created,
+            "date_modified": self.date_modified,
+        }
+

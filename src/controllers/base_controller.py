@@ -25,7 +25,7 @@ class BaseController:
     def __init__(
         self,
         event: Dict[str, Any],
-        request_context: RequestContext = None,
+        request_context: Optional[RequestContext] = None,
         require_auth: bool = True,
     ):
         self.event = event

@@ -492,5 +492,80 @@ def validate_refresh_token_data(data: Dict[str, Any]) -> Dict[str, Any]:
 
     return validated
 
+def validate_household_data(data: Dict[str, Any], is_create: bool = False) -> Dict[str, Any]:
+    """Validate household creation/update data."""
+    validator = Validator()
+    validated = {}
+
+    if "name" in data:
+        validated["name"] = validator.validate_string_length(
+            data["name"], "name", min_length=1, max_length=100
+        )
+    elif is_create:
+        raise MissingRequiredFieldError("name")
+
+    return validated
+
+
+def validate_household_member_data(data: Dict[str, Any]) -> Dict[str, Any]:
+    """Validate household member creation data."""
+    validator = Validator()
+    validated = {}
+
+    if "user_id" not in data or not data["user_id"]:
+        raise MissingRequiredFieldError("user_id")
+    validated["user_id"] = validator.validate_string_length(
+        data["user_id"], "user_id", min_length=1
+    )
+
+    if "role" not in data or not data["role"]:
+        raise MissingRequiredFieldError("role")
+    valid_roles = ["owner", "admin", "member"]
+    validated["role"] = validator.validate_enum(data["role"], "role", valid_roles)
+
+    if "display_name" in data and data["display_name"]:
+        validated["display_name"] = validator.validate_string_length(
+            data["display_name"], "display_name", min_length=1, max_length=50
+        )
+    else:
+        validated["display_name"] = None
+
+    if "dob" in data and data["dob"]:
+        validator.validate_date(data["dob"], "dob")
+        validated["dob"] = data["dob"]
+    else:
+        validated["dob"] = None
+
+    return validated
+
+
+def validate_household_subject_data(data: Dict[str, Any], is_create: bool = False) -> Dict[str, Any]:
+    """Validate household subject creation/update data."""
+    validator = Validator()
+    validated = {}
+
+    if "type" in data:
+        valid_types = ["child", "adult", "pet"]
+        validated["type"] = validator.validate_enum(data["type"], "type", valid_types)
+    elif is_create:
+        raise MissingRequiredFieldError("type")
+
+    if "display_name" in data and data["display_name"]:
+        validated["display_name"] = validator.validate_string_length(
+            data["display_name"], "display_name", min_length=1, max_length=50
+        )
+    elif "display_name" in data:
+        validated["display_name"] = None
+
+    if "dob" in data and data["dob"]:
+        validator.validate_date(data["dob"], "dob")
+        validated["dob"] = data["dob"]
+    elif "dob" in data:
+        validated["dob"] = None
+
+    return validated
+
+
+
 
 

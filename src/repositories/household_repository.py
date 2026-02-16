@@ -2,6 +2,7 @@ from typing import Any, Dict
 from mypy_boto3_dynamodb.type_defs import (
     PutItemInputTablePutItemTypeDef,
     GetItemInputTableGetItemTypeDef,
+    DeleteItemInputTableDeleteItemTypeDef,
 )
 
 from models.household import Household
@@ -36,3 +37,10 @@ class HouseholdRepository(BaseRepository):
             }
         }
         self.dynamodb_service.put(put_params)
+
+    def delete(self, household_id: str) -> None:
+        delete_params: DeleteItemInputTableDeleteItemTypeDef = {
+            "Key": {"pk": f"HOUSEHOLD#{household_id}", "sk": "META#HOUSEHOLD"}
+        }
+        self.dynamodb_service.delete(delete_params)
+

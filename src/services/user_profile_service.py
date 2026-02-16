@@ -1,10 +1,12 @@
+from typing import Optional
+
 from models.user_profile import UserProfile
 from repositories.user_profile_repository import UserProfileRepository
 from utils.helper import utc_now_iso, validate_dict_str_value
 
 
 class UserProfileService:
-    def __init__(self, user_profile_repo: UserProfileRepository = None):
+    def __init__(self, user_profile_repo: Optional[UserProfileRepository] = None):
         self.user_profile_repo = user_profile_repo or UserProfileRepository()
 
     def create(
@@ -37,7 +39,7 @@ class UserProfileService:
 
         user_profile.username = validate_dict_str_value(
             data, "username", user_profile.username
-        )
+        ) or user_profile.username
         user_profile.first_name = validate_dict_str_value(
             data, "first_name", user_profile.first_name
         )
