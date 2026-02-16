@@ -13,9 +13,12 @@ class BlogPost(BaseModel):
     id: str
     title: str
     content: str
+    household_id: str
+    subject_id: str
     date_created: str
     date_modified: str
 
+    entity: str = "Blog"
     summary: Optional[str] = None
     status: BlogStatusEnum = BlogStatusEnum.DRAFT
     visibility: BlogVisibilityEnum = BlogVisibilityEnum.PUBLIC

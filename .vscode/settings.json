@@ -1,4 +1,5 @@
 {
   "makefile.configureOnOpen": false,
-  "python.defaultInterpreterPath": ".venv/bin/python"
+  "python.defaultInterpreterPath": ".venv/bin/python",
+  "kiroAgent.configureMCP": "Disabled"
 }
