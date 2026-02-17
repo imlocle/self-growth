@@ -253,26 +253,34 @@ GET /households/{id}/subjects/{id}/habits/{id}/analytics   # Get analytics   ✅
 
 ### Mobile App Requirements
 
-#### 7. Pagination & Filtering 🟡 MEDIUM PRIORITY
+#### 7. Pagination & Filtering ✅ COMPLETE
 
-**Status**: Basic list endpoints exist, but limited filtering
+**Status**: Consistent pagination and status filtering across all list endpoints.
 
-**Required Enhancements**:
+**Supported Query Parameters** (all list endpoints):
 
-- Consistent pagination across all list endpoints
-- Filter by status (active, completed, archived, deleted)
-- Filter by date range
-- Sort options (date_created, date_modified, title)
-- Search by title/description
+```
+?limit=20          # Items per page (1-100, optional)
+?nextToken=...     # Opaque pagination token from previous response
+?status=active     # Filter by status (entity-specific values)
+?sortBy=date_due   # Sort option (todos only: date_modified, date_due)
+```
 
 **Affected Endpoints**:
 
-- GET /households/{id}/subjects/{id}/todos
-- GET /households/{id}/subjects/{id}/habits
-- GET /households/{id}/subjects/{id}/blogs
-- GET /households/{id}/subjects/{id}/habits/{id}/events
+- GET /todos — limit, nextToken, status, sortBy ✅
+- GET /habits — limit, nextToken, status ✅
+- GET /habit-events — limit, nextToken, status ✅
+- GET /blog-posts — limit, nextToken, status ✅
 
-**Estimated Effort**: 3-4 days
+**Completed Work**:
+
+- [x] `get_pagination_params()` in BaseController
+- [x] `encode_next_token` / `decode_next_token` helpers (base64 opaque tokens)
+- [x] All repositories accept limit, next_token, filter_expression
+- [x] All services pass through pagination and status filter
+- [x] All controllers extract query params and return `nextToken`
+- [x] DynamoDB FilterExpression for status filtering
 
 ---
 
@@ -563,7 +571,7 @@ A production-ready mobile backend must have:
 - [x] All core entities (User, Household, Subject, ToDo, Habit, HabitEvent, Blog)
 - [x] All CRUD operations for each entity
 - [x] Habit analytics and streaks (lightweight)
-- [ ] Pagination and filtering
+- [x] Pagination and filtering
 
 ### Security ✅
 
@@ -606,7 +614,7 @@ A production-ready mobile backend must have:
 
 ## 📊 Current Progress
 
-**Overall Completion**: ~80%
+**Overall Completion**: ~85%
 
 | Category             | Progress | Status                      |
 | -------------------- | -------- | --------------------------- |

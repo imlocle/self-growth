@@ -28,8 +28,29 @@ class BlogPostService:
             raise ValueError("Not Found")
         return BlogPost.from_dynamo(item)
 
-    def get_all(self, user_id: str) -> Dict[str, Any]:
-        response = self.blog_repo.get_all(user_id)
+    def get_all(
+        self,
+        user_id: str,
+        limit: int | None = None,
+        next_token: dict | None = None,
+        status: str | None = None,
+    ) -> Dict[str, Any]:
+        filter_expr = None
+        expr_names = None
+        expr_values = None
+        if status:
+            filter_expr = "#status = :status"
+            expr_names = {"#status": "status"}
+            expr_values = {":status": status}
+
+        response = self.blog_repo.get_all_paginated(
+            user_id=user_id,
+            limit=limit,
+            next_token=next_token,
+            filter_expression=filter_expr,
+            expression_attr_names=expr_names,
+            expression_attr_values=expr_values,
+        )
         return {
             "items": [BlogPost.from_dynamo(i) for i in response.get("items")],
             "lastEvaluatedKey": response.get("lastEvaluatedKey"),

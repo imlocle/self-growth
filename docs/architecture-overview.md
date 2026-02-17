@@ -401,7 +401,17 @@ Every entity has clear ownership:
 User → Household → Subject → Entity (ToDo, Habit, etc.)
 ```
 
-### 7. Idempotency
+### 7. Pagination
+
+All list endpoints support consistent cursor-based pagination:
+
+- `limit`: Max items per page (1-100, optional)
+- `nextToken`: Opaque base64-encoded pagination token
+- `status`: Filter by entity status
+- Tokens encode DynamoDB `LastEvaluatedKey` for the client
+- Decoded back to `ExclusiveStartKey` on the server
+
+### 8. Idempotency
 
 Operations are designed to be idempotent where possible:
 

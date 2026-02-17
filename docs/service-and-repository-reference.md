@@ -180,21 +180,27 @@ Retrieves a specific todo.
 
 - `NotFoundError`: If todo not found
 
-#### `get_all(user_id: str, household_id: str, subject_id: str, sort_by: str = "date_modified") -> dict`
+#### `get_all(user_id: str, household_id: str, subject_id: str, sort_by: str = "date_modified", limit: int = None, next_token: dict = None, status: str = None) -> dict`
 
-Retrieves all todos for a subject with sorting.
+Retrieves all todos for a subject with sorting, pagination, and filtering.
 
 **Sorting Options:**
 
 - `date_due`: Sort by due date (nulls last)
 - `date_modified`: Sort by modification date (default)
 
+**Pagination:**
+
+- `limit`: Max items per page (1-100)
+- `next_token`: DynamoDB ExclusiveStartKey for cursor-based pagination
+- `status`: Filter by status (active, completed, deleted)
+
 **Returns:**
 
 ```python
 {
     "items": [ToDo, ...],
-    "lastEvaluatedKey": None  # For pagination
+    "lastEvaluatedKey": {...}  # For pagination
 }
 ```
 
@@ -236,6 +242,51 @@ Manages habit operations with household/subject scoping.
 ### HabitEventService
 
 Manages habit event logging with period-based constraints.
+
+**Dependencies:**
+
+- `HabitEventRepository`
+- `HabitRepository`
+- `AccessService`
+
+### HabitAnalyticsService
+
+Lightweight on-the-fly analytics computed from habit events.
+
+**Dependencies:**
+
+- `HabitEventRepository`
+- `HabitRepository`
+- `AccessService`
+
+**Methods:**
+
+#### `get_analytics(user_id: str, household_id: str, subject_id: str, habit_id: str) -> dict`
+
+Computes analytics for a habit from all its events.
+
+**Returns:**
+
+```python
+{
+    "habit_id": "...",
+    "counter": "daily",
+    "total_events": 45,
+    "distribution": {"done": 38, "skipped": 5, "failed": 2},
+    "completion_rate": 0.8444,
+    "current_streak": 7,
+    "longest_streak": 14,
+    "first_event_date": "2025-11-01T08:00:00Z",
+    "last_event_date": "2026-02-16T07:30:00Z",
+}
+```
+
+**Computation:**
+
+- Fetches all events for the habit
+- Calculates streaks based on consecutive period keys (daily/weekly/monthly)
+- Current streak counts backwards from today/yesterday
+- Completion rate = done / total events
 
 **Dependencies:**
 
@@ -348,6 +399,24 @@ Fetches full user details from Cognito using access token.
 
 - `CognitoError`: Cognito service error
 
+#### `refresh_token(refresh_token: str) -> dict`
+
+Refreshes expired access tokens using a refresh token.
+
+**Returns:**
+
+```python
+{
+    "access_token": "...",
+    "id_token": "...",
+    "expires_in": 3600
+}
+```
+
+**Raises:**
+
+- `AuthenticationError`: Invalid or expired refresh token
+
 ## Repository Layer
 
 Repositories handle DynamoDB operations only. They contain no business logic, authorization, or validation.
@@ -386,9 +455,9 @@ Retrieves single todo by composite key.
 
 **Returns:** DynamoDB item dict or None if not found
 
-#### `get_all(household_id: str, subject_id: str) -> dict`
+#### `get_all(household_id: str, subject_id: str, limit: int = None, next_token: dict = None, filter_expression: str = None, ...) -> dict`
 
-Queries all todos for a subject using `begins_with` on sort key.
+Queries all todos for a subject using `begins_with` on sort key. Supports pagination and filtering.
 
 **Query Pattern:**
 
@@ -396,6 +465,7 @@ Queries all todos for a subject using `begins_with` on sort key.
 pk = f"HOUSEHOLD#{household_id}"
 sk_prefix = f"SUBJECT#{subject_id}#TODO#"
 # Query with begins_with(sk, sk_prefix)
+# Optional: Limit, ExclusiveStartKey, FilterExpression
 ```
 
 **Returns:**
@@ -403,7 +473,7 @@ sk_prefix = f"SUBJECT#{subject_id}#TODO#"
 ```python
 {
     "items": [dict, ...],
-    "lastEvaluatedKey": None  # For pagination
+    "lastEvaluatedKey": {...}  # For pagination
 }
 ```
 

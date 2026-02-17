@@ -125,6 +125,9 @@ class ToDoService:
         household_id: str,
         subject_id: str,
         sort_by: str = "date_modified",
+        limit: int | None = None,
+        next_token: dict | None = None,
+        status: str | None = None,
     ) -> Dict[str, Any]:
         """
         Get all todos for a subject.
@@ -134,9 +137,12 @@ class ToDoService:
             household_id: Household ID
             subject_id: Subject ID
             sort_by: Sort field ("date_modified" or "date_due")
+            limit: Max items to return
+            next_token: DynamoDB ExclusiveStartKey for pagination
+            status: Filter by status (active, completed, deleted)
 
         Returns:
-            Dict with items list and pagination key
+            Dict with items list and pagination token
         """
         try:
             self.access.assert_household_member(
@@ -156,8 +162,23 @@ class ToDoService:
                     details={"valid_values": valid_sort_options},
                 )
 
+            # Build filter expression for status
+            filter_expr = None
+            expr_names = None
+            expr_values = None
+            if status:
+                filter_expr = "#status = :status"
+                expr_names = {"#status": "status"}
+                expr_values = {":status": status}
+
             response = self.todo_repo.get_all(
-                household_id=household_id, subject_id=subject_id
+                household_id=household_id,
+                subject_id=subject_id,
+                limit=limit,
+                next_token=next_token,
+                filter_expression=filter_expr,
+                expression_attr_names=expr_names,
+                expression_attr_values=expr_values,
             )
             items = [ToDo.from_dynamo(i) for i in response.get("items")]
 

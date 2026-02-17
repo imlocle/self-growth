@@ -121,3 +121,25 @@ def validate_dict_str_value(
             raise ValueError(f"{key} must be a non-empty string")
         return value
     return default
+
+
+def encode_next_token(last_evaluated_key: dict | None) -> str | None:
+    """Encode DynamoDB LastEvaluatedKey as a base64 token for the client."""
+    if not last_evaluated_key:
+        return None
+    import base64
+    import json
+    return base64.urlsafe_b64encode(json.dumps(last_evaluated_key).encode()).decode()
+
+
+def decode_next_token(token: str | None) -> dict | None:
+    """Decode a base64 pagination token back to DynamoDB ExclusiveStartKey."""
+    if not token:
+        return None
+    import base64
+    import json
+    try:
+        return json.loads(base64.urlsafe_b64decode(token.encode()).decode())
+    except Exception:
+        from models.errors import ValidationError
+        raise ValidationError("Invalid pagination token", field="nextToken", value=token)

@@ -43,14 +43,22 @@ class HabitController(BaseController):
         household_id = self.require_household_id()
         subject_id = self.require_subject_id()
 
+        pagination = self.get_pagination_params()
+
+        from utils.helper import decode_next_token, encode_next_token
+        next_token = decode_next_token(pagination.get("next_token"))
+
         response = self.habit_service.get_all(
             user_id=self.auth_user.user_id,
             household_id=household_id,
             subject_id=subject_id,
+            limit=pagination.get("limit"),
+            next_token=next_token,
+            status=pagination.get("status"),
         )
         return {
             "items": [i.to_dict() for i in response.get("items")],
-            "lastEvaluatedKey": response.get("lastEvaluatedKey"),
+            "nextToken": encode_next_token(response.get("lastEvaluatedKey")),
         }
 
     def update(self) -> Habit:

@@ -77,15 +77,23 @@ class HabitEventController(BaseController):
         habit_id = self.request_context.require_habit_id()
         auth_user = self.request_context.require_auth()
 
+        pagination = self.get_pagination_params()
+
+        from utils.helper import decode_next_token, encode_next_token
+        next_token = decode_next_token(pagination.get("next_token"))
+
         response = self.habit_event_service.get_all(
             user_id=auth_user.user_id,
             household_id=household_id,
             subject_id=subject_id,
             habit_id=habit_id,
+            limit=pagination.get("limit"),
+            next_token=next_token,
+            status=pagination.get("status"),
         )
         return {
             "items": [e.to_dict() for e in response.get("items", [])],
-            "lastEvaluatedKey": response.get("lastEvaluatedKey"),
+            "nextToken": encode_next_token(response.get("lastEvaluatedKey")),
         }
     def get_analytics(self) -> Dict[str, Any]:
         """Get analytics for a habit"""

@@ -57,15 +57,31 @@ class HabitService:
         user_id: str,
         household_id: str,
         subject_id: str,
-        sort_by: str = "date_modifed",
+        limit: int | None = None,
+        next_token: dict | None = None,
+        status: str | None = None,
     ) -> Dict[str, Any]:
         self.access.assert_household_member(user_id=user_id, household_id=household_id)
         self.access.assert_subject_in_household(
             household_id=household_id, subject_id=subject_id
         )
 
+        filter_expr = None
+        expr_names = None
+        expr_values = None
+        if status:
+            filter_expr = "#status = :status"
+            expr_names = {"#status": "status"}
+            expr_values = {":status": status}
+
         response = self.habit_repo.get_all(
-            household_id=household_id, subject_id=subject_id
+            household_id=household_id,
+            subject_id=subject_id,
+            limit=limit,
+            next_token=next_token,
+            filter_expression=filter_expr,
+            expression_attr_names=expr_names,
+            expression_attr_values=expr_values,
         )
         return {
             "items": [Habit.from_dynamo(i) for i in response.get("items")],

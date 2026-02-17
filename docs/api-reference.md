@@ -128,6 +128,33 @@ Authenticate user and receive JWT tokens.
 - `401`: Invalid credentials
 - `400`: User not confirmed
 
+### POST /auth/refresh
+
+Refresh expired access tokens using a refresh token.
+
+**Request Body:**
+
+```json
+{
+  "refresh_token": "eyJjdHkiOiJKV1QiLCJlbmMi..."
+}
+```
+
+**Response (200 OK):**
+
+```json
+{
+  "accessToken": "eyJhbGciOiJSUzI1NiIs...",
+  "idToken": "eyJhbGciOiJSUzI1NiIs...",
+  "expiresIn": 86400,
+  "tokenType": "Bearer"
+}
+```
+
+**Error Codes:**
+
+- `400`: Invalid or expired refresh token
+
 ## User Profile Endpoints
 
 ### POST /user-profile
@@ -257,6 +284,9 @@ Get all todos for a subject.
 **Query Parameters:**
 
 - `sortBy` (string, optional): Sort order (`date_due` or `date_modified`, default: `date_modified`)
+- `limit` (integer, optional): Items per page (1-100)
+- `nextToken` (string, optional): Opaque pagination token from previous response
+- `status` (string, optional): Filter by status (`active`, `completed`, `deleted`)
 
 **Response (200 OK):**
 
@@ -266,10 +296,9 @@ Get all todos for a subject.
     {
       "id": "todo-id",
       "title": "Buy groceries"
-      // ... other todo fields
     }
   ],
-  "lastEvaluatedKey": null
+  "nextToken": "eyJwayI6Ik..."
 }
 ```
 
@@ -357,12 +386,17 @@ Get all habits for a subject.
     {
       "id": "habit-id",
       "title": "Morning run"
-      // ... other habit fields
     }
   ],
-  "lastEvaluatedKey": null
+  "nextToken": null
 }
 ```
+
+**Query Parameters:**
+
+- `limit` (integer, optional): Items per page (1-100)
+- `nextToken` (string, optional): Opaque pagination token from previous response
+- `status` (string, optional): Filter by status (`active`, `archived`, `deleted`)
 
 ### PUT /households/{householdId}/subjects/{subjectId}/habits/{habitId}
 
@@ -429,6 +463,294 @@ Create a habit event (log habit occurrence).
 - `400`: Event already exists for this period
 - `403`: User not authorized
 - `404`: Habit not found
+
+### GET /households/{householdId}/subjects/{subjectId}/habits/{habitId}/events
+
+Get all habit events for a habit.
+
+**Authentication:** Required
+**Authorization:** User must be household member
+
+**Query Parameters:**
+
+- `limit` (integer, optional): Items per page (1-100)
+- `nextToken` (string, optional): Opaque pagination token from previous response
+- `status` (string, optional): Filter by status (`done`, `skipped`, `failed`)
+
+**Response (200 OK):**
+
+```json
+{
+  "items": [
+    {
+      "id": "event-id",
+      "periodKey": "2025-01-15",
+      "status": "done"
+    }
+  ],
+  "nextToken": null
+}
+```
+
+### GET /households/{householdId}/subjects/{subjectId}/habits/{habitId}/events/{periodKey}
+
+Get a single habit event by period key.
+
+**Authentication:** Required
+**Authorization:** User must be household member
+
+**Response (200 OK):** HabitEvent object
+
+### GET /households/{householdId}/subjects/{subjectId}/habits/{habitId}/analytics
+
+Get analytics for a habit (computed on-the-fly from events).
+
+**Authentication:** Required
+**Authorization:** User must be household member
+
+**Response (200 OK):**
+
+```json
+{
+  "habitId": "habit-id",
+  "counter": "daily",
+  "totalEvents": 45,
+  "distribution": {
+    "done": 38,
+    "skipped": 5,
+    "failed": 2
+  },
+  "completionRate": 0.8444,
+  "currentStreak": 7,
+  "longestStreak": 14,
+  "firstEventDate": "2025-11-01T08:00:00Z",
+  "lastEventDate": "2026-02-16T07:30:00Z"
+}
+```
+
+## Household Endpoints
+
+### POST /households
+
+Create a new household.
+
+**Authentication:** Required
+
+**Request Body:**
+
+```json
+{
+  "name": "Smith Family"
+}
+```
+
+**Response (201 Created):** Household object
+
+### GET /households/{householdId}
+
+Get household details.
+
+**Authentication:** Required
+**Authorization:** User must be household member
+
+**Response (200 OK):** Household object
+
+### GET /households
+
+List user's households.
+
+**Authentication:** Required
+
+**Response (200 OK):**
+
+```json
+{
+  "items": [{ "id": "...", "name": "Smith Family" }]
+}
+```
+
+### PUT /households/{householdId}
+
+Update household.
+
+**Authentication:** Required
+**Authorization:** User must be household member
+
+**Response (200 OK):** Updated Household object
+
+### DELETE /households/{householdId}
+
+Delete household.
+
+**Authentication:** Required
+**Authorization:** User must be household member
+
+**Response (204 No Content)**
+
+## Household Member Endpoints
+
+### POST /households/{householdId}/members
+
+Add a member to a household.
+
+**Authentication:** Required
+**Authorization:** User must be household member
+
+**Request Body:**
+
+```json
+{
+  "user_id": "cognito-sub-of-new-member",
+  "role": "member"
+}
+```
+
+**Response (201 Created):** HouseholdMember object
+
+### GET /households/{householdId}/members
+
+List household members.
+
+**Authentication:** Required
+**Authorization:** User must be household member
+
+**Response (200 OK):**
+
+```json
+{
+  "items": [{ "userId": "...", "role": "owner" }]
+}
+```
+
+### DELETE /households/{householdId}/members/{userId}
+
+Remove a member from a household.
+
+**Authentication:** Required
+**Authorization:** User must be household member
+
+**Response (204 No Content)**
+
+## Household Subject Endpoints
+
+### POST /households/{householdId}/subjects
+
+Create a subject in a household.
+
+**Authentication:** Required
+**Authorization:** User must be household member
+
+**Request Body:**
+
+```json
+{
+  "display_name": "John",
+  "type": "self",
+  "dob": "1990-01-15"
+}
+```
+
+**Response (201 Created):** HouseholdSubject object
+
+### GET /households/{householdId}/subjects/{subjectId}
+
+Get subject details.
+
+**Authentication:** Required
+**Authorization:** User must be household member
+
+**Response (200 OK):** HouseholdSubject object
+
+### GET /households/{householdId}/subjects
+
+List all subjects in a household.
+
+**Authentication:** Required
+**Authorization:** User must be household member
+
+**Response (200 OK):**
+
+```json
+{
+  "items": [{ "id": "...", "displayName": "John" }]
+}
+```
+
+### PUT /households/{householdId}/subjects/{subjectId}
+
+Update a subject.
+
+**Authentication:** Required
+**Authorization:** User must be household member
+
+**Response (200 OK):** Updated HouseholdSubject object
+
+### DELETE /households/{householdId}/subjects/{subjectId}
+
+Delete a subject.
+
+**Authentication:** Required
+**Authorization:** User must be household member
+
+**Response (204 No Content)**
+
+## Blog Post Endpoints
+
+### POST /blogs
+
+Create a new blog post.
+
+**Authentication:** Required
+
+**Request Body:**
+
+```json
+{
+  "title": "My Reflection",
+  "content": "Today I learned...",
+  "status": "draft",
+  "visibility": "private"
+}
+```
+
+**Response (201 Created):** BlogPost object
+
+### GET /blogs/{postId}
+
+Get a specific blog post.
+
+**Authentication:** Required
+
+**Response (200 OK):** BlogPost object
+
+### GET /blogs
+
+List user's blog posts.
+
+**Authentication:** Required
+
+**Query Parameters:**
+
+- `limit` (integer, optional): Items per page (1-100)
+- `nextToken` (string, optional): Opaque pagination token
+- `status` (string, optional): Filter by status (`draft`, `published`, `archived`)
+
+**Response (200 OK):**
+
+```json
+{
+  "items": [{ "id": "...", "title": "My Reflection" }],
+  "nextToken": null
+}
+```
+
+### PUT /blogs/{postId}
+
+Update a blog post.
+
+**Authentication:** Required
+
+**Response (200 OK):** Updated BlogPost object
 
 ## Field Validation
 

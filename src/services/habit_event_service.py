@@ -125,6 +125,9 @@ class HabitEventService:
         household_id: str,
         subject_id: str,
         habit_id: str,
+        limit: int | None = None,
+        next_token: dict | None = None,
+        status: str | None = None,
     ) -> dict:
         """Get all habit events for a habit."""
         self.access.assert_household_member(user_id=user_id, household_id=household_id)
@@ -132,10 +135,23 @@ class HabitEventService:
             household_id=household_id, subject_id=subject_id
         )
 
+        filter_expr = None
+        expr_names = None
+        expr_values = None
+        if status:
+            filter_expr = "#status = :status"
+            expr_names = {"#status": "status"}
+            expr_values = {":status": status}
+
         response = self.event_repo.get_all(
             household_id=household_id,
             subject_id=subject_id,
             habit_id=habit_id,
+            limit=limit,
+            next_token=next_token,
+            filter_expression=filter_expr,
+            expression_attr_names=expr_names,
+            expression_attr_values=expr_values,
         )
         items = [HabitEvent.from_dynamo(i) for i in response.get("items", [])]
         return {

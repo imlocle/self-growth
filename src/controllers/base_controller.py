@@ -82,6 +82,34 @@ class BaseController:
     def get_query_param(self, key: str, default: Optional[str] = None) -> Optional[str]:
         """Get a query parameter by key"""
         return self.request_context.get_query_param(key, default)
+    def get_pagination_params(self) -> Dict[str, Any]:
+        """Extract standard pagination and filter params from query string."""
+        params: Dict[str, Any] = {}
+
+        limit = self.get_query_param("limit")
+        if limit is not None:
+            try:
+                limit_int = int(limit)
+                if limit_int < 1 or limit_int > 100:
+                    raise ValueError()
+                params["limit"] = limit_int
+            except ValueError:
+                from models.errors import ValidationError
+                raise ValidationError(
+                    "limit must be an integer between 1 and 100",
+                    field="limit",
+                    value=limit,
+                )
+
+        next_token = self.get_query_param("nextToken")
+        if next_token:
+            params["next_token"] = next_token
+
+        status = self.get_query_param("status")
+        if status:
+            params["status"] = status
+
+        return params
     
     # =========================================================================
     # Error Logging (Delegated to RequestContext)

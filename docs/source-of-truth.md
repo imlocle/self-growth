@@ -274,16 +274,20 @@ POST /households/{householdId}/subjects/{subjectId}/habits/{habitId}/events
 - `update-todo`: PUT /households/{id}/subjects/{id}/todos/{id}
 - `delete-todo`: DELETE /households/{id}/subjects/{id}/todos/{id}
 
-### Habit Operations (4 functions)
+### Habit Operations (5 functions)
 
 - `create-habit`: POST /households/{id}/subjects/{id}/habits
 - `get-habit`: GET /households/{id}/subjects/{id}/habits/{id}
 - `get-all-habit`: GET /households/{id}/subjects/{id}/habits
 - `update-habit`: PUT /households/{id}/subjects/{id}/habits/{id}
+- `delete-habit`: DELETE /households/{id}/subjects/{id}/habits/{id}
 
-### Habit Event Operations (1 function)
+### Habit Event Operations (4 functions)
 
 - `create-habit-event`: POST /households/{id}/subjects/{id}/habits/{id}/events
+- `get-habit-event`: GET /households/{id}/subjects/{id}/habits/{id}/events/{periodKey}
+- `get-all-habit-events`: GET /households/{id}/subjects/{id}/habits/{id}/events
+- `get-habit-analytics`: GET /households/{id}/subjects/{id}/habits/{id}/analytics
 
 ### Blog Operations (4 functions)
 
@@ -292,18 +296,41 @@ POST /households/{householdId}/subjects/{subjectId}/habits/{habitId}/events
 - `get-all-blog`: GET /households/{id}/subjects/{id}/blogs
 - `update-blog`: PUT /households/{id}/subjects/{id}/blogs/{id}
 
-### Authentication (3 functions)
+### Authentication (4 functions)
 
 - `signup`: POST /auth/signup
 - `login`: POST /auth/login
 - `confirm-signup`: POST /auth/confirm
+- `refresh-token`: POST /auth/refresh
 
 ### User Profile (2 functions)
 
 - `create-user-profile`: POST /user-profile
 - `get-user-profile`: GET /user-profile
 
-**Total: 19 Lambda functions**
+### Household Operations (5 functions)
+
+- `create-household`: POST /households
+- `get-household`: GET /households/{id}
+- `get-all-households`: GET /households
+- `update-household`: PUT /households/{id}
+- `delete-household`: DELETE /households/{id}
+
+### Household Member Operations (3 functions)
+
+- `create-member`: POST /households/{id}/members
+- `get-all-members`: GET /households/{id}/members
+- `delete-member`: DELETE /households/{id}/members/{userId}
+
+### Household Subject Operations (5 functions)
+
+- `create-subject`: POST /households/{id}/subjects
+- `get-subject`: GET /households/{id}/subjects/{id}
+- `get-all-subjects`: GET /households/{id}/subjects
+- `update-subject`: PUT /households/{id}/subjects/{id}
+- `delete-subject`: DELETE /households/{id}/subjects/{id}
+
+**Total: 37 Lambda functions**
 
 ---
 
@@ -525,6 +552,6 @@ make nuke && make deploy ENV=dev
 
 This document reflects the backend as of **February 2026**.
 
-**Current Version**: Habit Events v1 + Blog Posts + Comprehensive Validation
+**Current Version**: Full CRUD + Pagination + Analytics
 
-**Last Updated**: 2026-02-13
+**Last Updated**: 2026-02-16

@@ -26,10 +26,20 @@ class BlogPostController(BaseController):
         return self.blog_service.get(self.auth_user.user_id, self.post_id)
 
     def get_all(self) -> Dict[str, Any]:
-        response = self.blog_service.get_all(self.auth_user.user_id)
+        pagination = self.get_pagination_params()
+
+        from utils.helper import decode_next_token, encode_next_token
+        next_token = decode_next_token(pagination.get("next_token"))
+
+        response = self.blog_service.get_all(
+            user_id=self.auth_user.user_id,
+            limit=pagination.get("limit"),
+            next_token=next_token,
+            status=pagination.get("status"),
+        )
         return {
             "items": [i.to_dict() for i in response.get("items")],
-            "lastEvaluatedKey": response.get("lastEvaluatedKey", None),
+            "nextToken": encode_next_token(response.get("lastEvaluatedKey")),
         }
 
     def update(self) -> BlogPost:
