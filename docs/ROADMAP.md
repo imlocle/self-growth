@@ -204,32 +204,36 @@ DELETE /households/{id}/subjects/{id}/habits/{id}   # Delete habit   ✅
 
 ### Data & Analytics
 
-#### 5. Habit Analytics & Streaks 🟡 MEDIUM PRIORITY
+#### 5. Habit Analytics & Streaks ✅ COMPLETE (Lightweight)
 
-**Status**: Not implemented
+**Status**: Lightweight on-the-fly analytics endpoint. Computes from existing habit events — no new data store needed.
 
-**Features Needed**:
+**Implemented Endpoint**:
 
-- Current streak calculation
-- Longest streak calculation
-- Completion rate (last 7/30/90 days)
-- Success/skip/fail distribution
-- Consistency score
+```
+GET /households/{id}/subjects/{id}/habits/{id}/analytics   # Get analytics   ✅
+```
 
-**Implementation Options**:
+**Response includes**:
 
-1. **Real-time calculation**: Query events and calculate on-demand
-2. **Cached aggregates**: Store computed metrics in DynamoDB
-3. **Hybrid**: Cache with TTL, recalculate on miss
+- Total events, completion rate
+- Distribution (done/skipped/failed)
+- Current streak, longest streak
+- First and last event dates
 
-**Recommended**: Start with real-time, optimize later with caching.
+**Completed Work**:
 
-**Estimated Effort**: 3-5 days
+- [x] HabitAnalyticsService with streak and distribution computation
+- [x] Controller method on HabitEventController
+- [x] Lambda handler with BaseHandler pattern
+- [x] Terraform Lambda configuration with API Gateway route
+- [x] Supports daily, weekly, and monthly habit counters
 
-- Design analytics data structure
-- Implement streak calculation logic
-- Add analytics endpoint
-- Consider caching strategy
+**Future enhancements** (separate project):
+
+- Cached aggregates for high-volume users
+- Trend analysis, predictive insights
+- Date range filtering
 
 ---
 
@@ -558,7 +562,7 @@ A production-ready mobile backend must have:
 
 - [x] All core entities (User, Household, Subject, ToDo, Habit, HabitEvent, Blog)
 - [x] All CRUD operations for each entity
-- [ ] Habit analytics and streaks (deferred — separate project)
+- [x] Habit analytics and streaks (lightweight)
 - [ ] Pagination and filtering
 
 ### Security ✅

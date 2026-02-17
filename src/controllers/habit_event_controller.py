@@ -22,6 +22,7 @@ class HabitEventController(BaseController):
     ):
         super().__init__(event=event, request_context=request_context, require_auth=True)
         self.habit_event_service = habit_event_service or HabitEventService()
+        self._analytics_service = None
 
     @property
     def period_key(self) -> Optional[str]:
@@ -86,3 +87,21 @@ class HabitEventController(BaseController):
             "items": [e.to_dict() for e in response.get("items", [])],
             "lastEvaluatedKey": response.get("lastEvaluatedKey"),
         }
+    def get_analytics(self) -> Dict[str, Any]:
+        """Get analytics for a habit"""
+        from services.habit_analytics_service import HabitAnalyticsService
+
+        household_id = self.require_household_id()
+        subject_id = self.require_subject_id()
+        habit_id = self.request_context.require_habit_id()
+        auth_user = self.request_context.require_auth()
+
+        if not self._analytics_service:
+            self._analytics_service = HabitAnalyticsService()
+
+        return self._analytics_service.get_analytics(
+            user_id=auth_user.user_id,
+            household_id=household_id,
+            subject_id=subject_id,
+            habit_id=habit_id,
+        )
