@@ -1,70 +1,109 @@
-# API Reference
+# Complete API Reference
 
-## Base URL
+**Version**: 1.0  
+**Last Updated**: February 16, 2026  
+**Status**: Production Ready
 
-- **Development**: `https://api-dev.self-growth.com` (example)
-- **Production**: `https://api.self-growth.com` (example)
+This is the complete API reference for the Self-Growth backend. Use this document to integrate with the API from mobile or web applications.
 
-## Authentication
+---
 
-All endpoints except authentication endpoints require a valid JWT token in the Authorization header:
+## Table of Contents
 
+1. [Base Information](#base-information)
+2. [Authentication Flow](#authentication-flow)
+3. [Authentication Endpoints](#authentication-endpoints)
+4. [User Profile Endpoints](#user-profile-endpoints)
+5. [Household Endpoints](#household-endpoints)
+6. [Household Member Endpoints](#household-member-endpoints)
+7. [Household Subject Endpoints](#household-subject-endpoints)
+8. [ToDo Endpoints](#todo-endpoints)
+9. [Habit Endpoints](#habit-endpoints)
+10. [Habit Event Endpoints](#habit-event-endpoints)
+11. [Blog Post Endpoints](#blog-post-endpoints)
+12. [Pagination & Filtering](#pagination--filtering)
+13. [Error Handling](#error-handling)
+14. [Rate Limiting](#rate-limiting)
+15. [Security & Validation](#security--validation)
+
+---
+
+## Base Information
+
+### Base URLs
+
+- **Development**: `https://{api-id}.execute-api.{region}.amazonaws.com/dev`
+- **Production**: `https://{api-id}.execute-api.{region}.amazonaws.com/prod`
+
+Replace `{api-id}` and `{region}` with your deployed API Gateway values.
+
+### Authentication Header
+
+All endpoints except authentication endpoints require a JWT access token:
+
+```http
+Authorization: Bearer <access-token>
 ```
-Authorization: Bearer <jwt-token>
+
+### Content Type
+
+All requests with a body must include:
+
+```http
+Content-Type: application/json
 ```
 
-## Response Format
+### Response Format
 
-All responses return JSON with camelCase keys. Successful responses include the requested data, while error responses include an error message.
+All responses are JSON with the following structure:
 
-**Success Response:**
+**Success (2xx):**
 
 ```json
 {
-  "statusCode": 200,
-  "body": "{\"id\": \"...\", \"title\": \"...\", \"dateCreated\": \"...\"}"
+  "id": "resource-id",
+  "field": "value",
+  ...
 }
 ```
 
-**Error Response:**
+**Error (4xx/5xx):**
 
 ```json
 {
-  "statusCode": 400,
-  "body": "{\"error\": \"Invalid input\"}"
+  "error": "ERROR_CODE",
+  "message": "Human-readable error message",
+  "details": {
+    "field": "field_name",
+    "additionalInfo": "..."
+  }
 }
 ```
 
-## Input Sanitization
+---
 
-All user input is automatically sanitized to prevent XSS and injection attacks:
+## Authentication Flow
 
-- **HTML tags** are stripped from all text fields
-- **Script content** is removed
-- **Special characters** are escaped (`<`, `>`, `&`, `"`, `'`)
-- **Null bytes** are removed
-- **Whitespace** is normalized
-- **Maximum lengths** are enforced per field
+### New User Registration
 
-**Example**:
+1. **Sign Up** → `POST /auth/signup`
+2. **Confirm Email** → `POST /auth/confirm` (with code from email)
+3. **Login** → `POST /auth/login` (get tokens)
+4. **Create Profile** → `POST /user-profile` (with access token)
 
-```json
-// Request
-{
-  "title": "<script>alert('XSS')</script>Buy groceries",
-  "description": "Get <b>milk</b> and eggs"
-}
+### Existing User Login
 
-// Stored (sanitized)
-{
-  "title": "Buy groceries",
-  "description": "Get milk and eggs"
-}
-```
+1. **Login** → `POST /auth/login` (get tokens)
+2. Use `accessToken` for API requests
+3. When `accessToken` expires → `POST /auth/refresh` (with `refreshToken`)
 
-See [Input Sanitization Documentation](./input-sanitization.md) for details.
+### Token Lifecycle
 
-## Authentication Endpoints
+- **Access Token**: Valid for 24 hours, used for API requests
+- **ID Token**: Contains user claims (email, name, etc.)
+- **Refresh Token**: Valid for 30 days, used to get new access tokens
+
+---
 
 ### POST /auth/signup
 

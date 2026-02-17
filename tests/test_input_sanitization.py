@@ -8,7 +8,7 @@ import sys
 import os
 
 import pytest
-from src.utils.validation import (
+from utils.validation import (
     sanitize_html,
     sanitize_string,
     validate_todo_data,
@@ -16,7 +16,7 @@ from src.utils.validation import (
     validate_user_profile_data,
     Validator,
 )
-from src.models.errors import ValidationError
+from models.errors import ValidationError, InvalidUsernameError
 
 
 class TestHTMLSanitization:
@@ -130,7 +130,7 @@ class TestTodoValidation:
         }
         with pytest.raises(ValidationError) as exc_info:
             validate_todo_data(data, is_create=True)
-        assert 'max_length' in str(exc_info.value.details)
+        assert exc_info.value.details.get('max_length') == 200
 
     def test_validate_todo_enforces_max_description_length(self):
         """Todo description should not exceed 1000 characters"""
@@ -141,7 +141,7 @@ class TestTodoValidation:
         }
         with pytest.raises(ValidationError) as exc_info:
             validate_todo_data(data, is_create=True)
-        assert 'max_length' in str(exc_info.value.details)
+        assert exc_info.value.details.get('max_length') == 1000
 
 
 class TestHabitValidation:
@@ -196,7 +196,7 @@ class TestUserProfileValidation:
         validator = Validator()
         with pytest.raises(ValidationError) as exc_info:
             validator.validate_email(long_email)
-        assert 'too long' in str(exc_info.value.message).lower()
+        assert 'too long' in exc_info.value.message.lower()
 
 
 class TestFieldLengthLimits:
@@ -207,11 +207,11 @@ class TestFieldLengthLimits:
         validator = Validator()
         
         # Too short
-        with pytest.raises(ValidationError):
+        with pytest.raises((ValidationError, InvalidUsernameError)):
             validator.validate_username('ab')
         
         # Too long
-        with pytest.raises(ValidationError):
+        with pytest.raises((ValidationError, InvalidUsernameError)):
             validator.validate_username('a' * 21)
         
         # Valid
