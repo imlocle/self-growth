@@ -1,8 +1,9 @@
 """
-Validation utilities with enhanced error handling.
+Validation utilities with enhanced error handling and input sanitization.
 """
 
 import re
+import html
 from typing import Any, List, Dict, Optional
 from datetime import datetime, date
 from models.errors import (
@@ -13,6 +14,78 @@ from models.errors import (
     InvalidEnumError,
     MissingRequiredFieldError,
 )
+
+
+# =========================================================================
+# Input Sanitization Functions
+# =========================================================================
+
+def sanitize_html(value: str) -> str:
+    """
+    Sanitize HTML and script content from input strings.
+    
+    - Strips HTML tags
+    - Escapes special characters to prevent XSS
+    - Removes script/style content
+    
+    Args:
+        value: Input string to sanitize
+        
+    Returns:
+        Sanitized string safe for storage and display
+    """
+    if not value:
+        return value
+    
+    # Remove script and style tags with their content
+    value = re.sub(r'<script[^>]*>.*?</script>', '', value, flags=re.IGNORECASE | re.DOTALL)
+    value = re.sub(r'<style[^>]*>.*?</style>', '', value, flags=re.IGNORECASE | re.DOTALL)
+    
+    # Remove HTML tags
+    value = re.sub(r'<[^>]+>', '', value)
+    
+    # Escape HTML special characters
+    value = html.escape(value)
+    
+    # Remove null bytes
+    value = value.replace('\x00', '')
+    
+    return value
+
+
+def sanitize_string(value: str, allow_newlines: bool = True) -> str:
+    """
+    Sanitize general string input.
+    
+    - Strips leading/trailing whitespace
+    - Removes HTML/script content
+    - Optionally removes newlines
+    - Normalizes whitespace
+    
+    Args:
+        value: Input string to sanitize
+        allow_newlines: If False, replaces newlines with spaces
+        
+    Returns:
+        Sanitized string
+    """
+    if not value:
+        return value
+    
+    # Strip leading/trailing whitespace
+    value = value.strip()
+    
+    # Sanitize HTML
+    value = sanitize_html(value)
+    
+    # Handle newlines
+    if not allow_newlines:
+        value = value.replace('\n', ' ').replace('\r', ' ')
+    
+    # Normalize multiple spaces
+    value = re.sub(r' +', ' ', value)
+    
+    return value
 
 
 class Validator:
@@ -31,7 +104,8 @@ class Validator:
         if not username:
             raise MissingRequiredFieldError("username")
 
-        username = username.strip()
+        # Sanitize input (no HTML allowed in usernames)
+        username = sanitize_string(username, allow_newlines=False)
 
         if not re.match(r"^[a-zA-Z0-9_]{3,20}$", username):
             raise InvalidUsernameError(username)
@@ -51,12 +125,21 @@ class Validator:
         if not email:
             raise MissingRequiredFieldError("email")
 
-        email = email.strip().lower()
+        # Sanitize and normalize
+        email = sanitize_string(email, allow_newlines=False).lower()
 
         # Basic email regex - more comprehensive than before
         email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
         if not re.match(email_pattern, email):
             raise InvalidEmailError(email)
+
+        # Enforce maximum length
+        if len(email) > 254:  # RFC 5321
+            raise ValidationError(
+                "Email address is too long (max 254 characters)",
+                field="email",
+                value=email
+            )
 
         return email
 
@@ -88,13 +171,14 @@ class Validator:
 
     @staticmethod
     def validate_string_length(
-        value: str, field_name: str, min_length: int = None, max_length: int = None
+        value: str, field_name: str, min_length: Optional[int] = None, max_length: Optional[int] = None
     ) -> str:
-        """Validate string length"""
+        """Validate string length with sanitization"""
         if value is None:
             raise MissingRequiredFieldError(field_name)
 
-        value = value.strip()
+        # Sanitize input (allow newlines for text fields)
+        value = sanitize_string(value, allow_newlines=True)
         length = len(value)
 
         if min_length is not None and length < min_length:
@@ -116,7 +200,7 @@ class Validator:
         return value
 
     @staticmethod
-    def validate_date(value: str, field_name: str) -> date:
+    def validate_date(value: str, field_name: str) -> Optional[date]:
         """Validate date format (YYYY-MM-DD)"""
         if not value:
             return None  # Optional field
@@ -134,8 +218,8 @@ class Validator:
     def validate_list(
         value: List[Any],
         field_name: str,
-        max_items: int = None,
-        item_validator: callable = None,
+        max_items: Optional[int] = None,
+        item_validator: Optional[Any] = None,
     ) -> List[Any]:
         """Validate list field"""
         if value is None:
@@ -371,17 +455,27 @@ def validate_login_data(data: Dict[str, Any]) -> Dict[str, Any]:
     if not username:
         raise MissingRequiredFieldError("username or email")
 
-    validated["username"] = validator.validate_string_length(
-        username, "username", min_length=1, max_length=100
+    # Sanitize username/email input
+    validated["username"] = sanitize_string(
+        validator.validate_string_length(username, "username", min_length=1, max_length=254),
+        allow_newlines=False
     )
 
-    # Password - required
+    # Password - required (no sanitization, preserve exact input)
     if "password" not in data:
         raise MissingRequiredFieldError("password")
 
-    validated["password"] = validator.validate_string_length(
-        data["password"], "password", min_length=1
-    )
+    password = data["password"]
+    if not password or len(password) < 1:
+        raise ValidationError("Password is required", field="password")
+    
+    if len(password) > 256:  # Reasonable max for passwords
+        raise ValidationError(
+            "Password is too long (max 256 characters)",
+            field="password"
+        )
+
+    validated["password"] = password
 
     return validated
 
@@ -405,13 +499,24 @@ def validate_signup_data(data: Dict[str, Any]) -> Dict[str, Any]:
     # Email - required
     validated["email"] = validator.validate_email(data.get("email", ""))
 
-    # Password - required
+    # Password - required (no sanitization, preserve exact input)
     if "password" not in data:
         raise MissingRequiredFieldError("password")
 
-    validated["password"] = validator.validate_string_length(
-        data["password"], "password", min_length=8
-    )
+    password = data["password"]
+    if not password or len(password) < 8:
+        raise ValidationError(
+            "Password must be at least 8 characters long",
+            field="password"
+        )
+    
+    if len(password) > 256:
+        raise ValidationError(
+            "Password is too long (max 256 characters)",
+            field="password"
+        )
+
+    validated["password"] = password
 
     # Phone number - optional
     if "phone_number" in data and data["phone_number"]:
@@ -457,12 +562,13 @@ def validate_confirm_signup_data(data: Dict[str, Any]) -> Dict[str, Any]:
     # Email - required
     validated["email"] = validator.validate_email(data.get("email", ""))
 
-    # Confirmation code - required
+    # Confirmation code - required (alphanumeric only, no HTML)
     if "confirmation_code" not in data:
         raise MissingRequiredFieldError("confirmation_code")
 
+    code = sanitize_string(data["confirmation_code"], allow_newlines=False)
     validated["confirmation_code"] = validator.validate_string_length(
-        data["confirmation_code"], "confirmation_code", min_length=4, max_length=10
+        code, "confirmation_code", min_length=4, max_length=10
     )
 
     return validated

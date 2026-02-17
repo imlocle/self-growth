@@ -35,6 +35,35 @@ All responses return JSON with camelCase keys. Successful responses include the 
 }
 ```
 
+## Input Sanitization
+
+All user input is automatically sanitized to prevent XSS and injection attacks:
+
+- **HTML tags** are stripped from all text fields
+- **Script content** is removed
+- **Special characters** are escaped (`<`, `>`, `&`, `"`, `'`)
+- **Null bytes** are removed
+- **Whitespace** is normalized
+- **Maximum lengths** are enforced per field
+
+**Example**:
+
+```json
+// Request
+{
+  "title": "<script>alert('XSS')</script>Buy groceries",
+  "description": "Get <b>milk</b> and eggs"
+}
+
+// Stored (sanitized)
+{
+  "title": "Buy groceries",
+  "description": "Get milk and eggs"
+}
+```
+
+See [Input Sanitization Documentation](./input-sanitization.md) for details.
+
 ## Authentication Endpoints
 
 ### POST /auth/signup
