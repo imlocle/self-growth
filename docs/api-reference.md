@@ -790,7 +790,17 @@ Update a blog post.
 - `403`: Forbidden (insufficient permissions)
 - `404`: Not Found
 - `409`: Conflict (duplicate resource)
+- `429`: Too Many Requests (rate limit exceeded)
 - `500`: Internal Server Error
+
+### Rate Limiting
+
+All endpoints are subject to rate limiting:
+
+- **Burst Limit**: 100 concurrent requests
+- **Rate Limit**: 50 requests per second
+
+When rate limited, the API returns `429 Too Many Requests`. Implement exponential backoff retry logic in your client. See [Rate Limiting Documentation](../docs/rate-limiting.md) for details.
 
 ### Common Error Messages
 

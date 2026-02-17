@@ -301,19 +301,39 @@ GET /households/{id}/subjects/{id}/habits/{id}/analytics   # Get analytics   ✅
 
 ### Security & Validation
 
-#### 9. Rate Limiting 🟡 MEDIUM PRIORITY
+#### 9. Rate Limiting ✅ COMPLETE
 
-**Status**: Error type exists, but not enforced
+**Status**: API Gateway throttling implemented with monitoring.
 
-**Implementation**:
+**Implemented Features**:
 
-- API Gateway throttling (basic)
-- Per-user rate limiting (advanced)
-- DynamoDB-based rate limit tracking
+- Stage-level throttling (100 burst, 50 req/sec)
+- CloudWatch access logs for monitoring
+- CloudWatch alarms for 4xx/5xx errors
+- Comprehensive documentation with retry strategies
 
-**Recommended**: Start with API Gateway throttling.
+**Configuration**:
 
-**Estimated Effort**: 1-2 days
+```
+Burst Limit: 100 concurrent requests
+Rate Limit: 50 requests/second (steady state)
+Response: 429 Too Many Requests
+```
+
+**Completed Work**:
+
+- [x] API Gateway stage throttling settings
+- [x] CloudWatch log group for access logs
+- [x] CloudWatch alarms (4xx and 5xx errors)
+- [x] Configurable via Terraform variables
+- [x] Rate limiting documentation with retry examples
+- [x] Monitoring and troubleshooting guide
+
+**Future Enhancements** (not MVP):
+
+- Per-user rate limiting with usage plans
+- DynamoDB or Redis-based tracking
+- Different limits per endpoint
 
 ---
 
@@ -577,7 +597,7 @@ A production-ready mobile backend must have:
 
 - [x] Authentication (Cognito)
 - [x] Authorization (household membership)
-- [ ] Rate limiting
+- [x] Rate limiting
 - [ ] Input sanitization
 - [x] CORS configuration
 
@@ -614,24 +634,24 @@ A production-ready mobile backend must have:
 
 ## 📊 Current Progress
 
-**Overall Completion**: ~85%
+**Overall Completion**: ~87%
 
-| Category             | Progress | Status                      |
-| -------------------- | -------- | --------------------------- |
-| Core Architecture    | 100%     | ✅ Complete                 |
-| Authentication       | 100%     | ✅ Complete (incl. refresh) |
-| User Management      | 100%     | ✅ Complete                 |
-| Household Management | 100%     | ✅ Complete                 |
-| Subject Management   | 100%     | ✅ Complete                 |
-| Member Management    | 100%     | ✅ Complete                 |
-| ToDo Features        | 100%     | ✅ Complete                 |
-| Habit Features       | 100%     | ✅ Complete                 |
-| Habit Events         | 100%     | ✅ Complete                 |
-| Blog Features        | 100%     | ✅ Complete                 |
-| Security             | 80%      | 🟡 Missing rate limiting    |
-| Testing              | 10%      | 🔴 Minimal tests            |
-| Monitoring           | 40%      | 🟡 Basic logging only       |
-| Documentation        | 60%      | 🟡 Missing API docs         |
+| Category             | Progress | Status                        |
+| -------------------- | -------- | ----------------------------- |
+| Core Architecture    | 100%     | ✅ Complete                   |
+| Authentication       | 100%     | ✅ Complete (incl. refresh)   |
+| User Management      | 100%     | ✅ Complete                   |
+| Household Management | 100%     | ✅ Complete                   |
+| Subject Management   | 100%     | ✅ Complete                   |
+| Member Management    | 100%     | ✅ Complete                   |
+| ToDo Features        | 100%     | ✅ Complete                   |
+| Habit Features       | 100%     | ✅ Complete                   |
+| Habit Events         | 100%     | ✅ Complete                   |
+| Blog Features        | 100%     | ✅ Complete                   |
+| Security             | 90%      | 🟡 Missing input sanitization |
+| Testing              | 10%      | 🔴 Minimal tests              |
+| Monitoring           | 60%      | 🟡 Basic logging + alarms     |
+| Documentation        | 80%      | 🟡 API docs complete          |
 
 ---
 

@@ -16,7 +16,7 @@
 # Full reset:
 #   make nuke && make deploy ENV=dev
 
-.PHONY: deploy clean nuke \
+.PHONY: deploy clean nuke check-aws-credentials \
         zip-all zip-layer generate-backend-config terraform-init terraform-apply \
         rebuild-layer rebuild-zips \
         $(LAMBDAS:%=zip-%) $(LAMBDAS:%=deploy-%)
@@ -38,10 +38,13 @@ BACKEND_CONFIG_TMP = $(TERRAFORM_DIR)/backend.auto.hcl
 
 # List all Lambda logical names (WITHOUT env suffix or .zip)
 LAMBDAS = create-todo get-todo get-all-todo update-todo delete-todo \
-          create-habit get-habit get-all-habit update-habit \
-          signup login confirm-signup \
+          create-habit get-habit get-all-habit update-habit delete-habit \
+          create-habit-event get-habit-event get-all-habit-events get-habit-analytics \
+          signup login confirm-signup refresh-token \
           create-user-profile get-user-profile \
-          create-habit-event
+          create-household get-household get-all-households update-household delete-household \
+          create-member get-all-members delete-member \
+          create-subject get-subject get-all-subjects update-subject delete-subject
 
 PYTHON_LAYER_IMAGE = public.ecr.aws/sam/build-python3.13
 REQ_FILE = src/requirements.txt
@@ -69,6 +72,39 @@ clean:
 # Full reset (use when terraform init/cache gets weird)
 nuke: clean
 	rm -rf $(TERRAFORM_DIR)/.terraform $(TERRAFORM_DIR)/.terraform.lock.hcl
+
+#####################################
+# AWS Credentials Check
+#####################################
+
+check-aws-credentials:
+	@echo "🔍 Checking AWS credentials..."
+	@if [ -z "$$AWS_PROFILE" ] && [ -z "$$AWS_ACCESS_KEY_ID" ]; then \
+		echo "❌ ERROR: AWS credentials not configured!"; \
+		echo ""; \
+		echo "Please configure AWS credentials using one of these methods:"; \
+		echo ""; \
+		echo "Option 1: Use AWS CLI profile"; \
+		echo "  export AWS_PROFILE=default"; \
+		echo "  export AWS_REGION=$(REGION)"; \
+		echo ""; \
+		echo "Option 2: Use environment variables"; \
+		echo "  export AWS_ACCESS_KEY_ID=your-key"; \
+		echo "  export AWS_SECRET_ACCESS_KEY=your-secret"; \
+		echo "  export AWS_REGION=$(REGION)"; \
+		echo ""; \
+		echo "Option 3: Disable IMDS and use AWS CLI"; \
+		echo "  export AWS_EC2_METADATA_DISABLED=true"; \
+		echo "  export AWS_PROFILE=default"; \
+		echo "  export AWS_REGION=$(REGION)"; \
+		echo ""; \
+		echo "Verify with: aws sts get-caller-identity"; \
+		exit 1; \
+	fi
+	@aws sts get-caller-identity > /dev/null 2>&1 || \
+		(echo "❌ ERROR: AWS credentials are invalid or AWS CLI is not configured" && \
+		 echo "Run: aws configure" && exit 1)
+	@echo "✅ AWS credentials verified"
 
 #####################################
 # Backend config (file target)
@@ -124,7 +160,7 @@ zip-all: zip-layer $(LAMBDAS:%=$(BUILD_DIR)/$(PROJECT_NAME)-%-$(ENV).zip)
 # Terraform commands (incremental)
 #####################################
 
-terraform-init: $(BACKEND_CONFIG_TMP)
+terraform-init: check-aws-credentials $(BACKEND_CONFIG_TMP)
 	terraform -chdir=$(TERRAFORM_DIR) init -backend-config=$(notdir $(BACKEND_CONFIG_TMP))
 
 terraform-apply:
