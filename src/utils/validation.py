@@ -629,19 +629,6 @@ def validate_household_member_data(data: Dict[str, Any]) -> Dict[str, Any]:
     valid_roles = ["owner", "admin", "member"]
     validated["role"] = validator.validate_enum(data["role"], "role", valid_roles)
 
-    if "display_name" in data and data["display_name"]:
-        validated["display_name"] = validator.validate_string_length(
-            data["display_name"], "display_name", min_length=1, max_length=50
-        )
-    else:
-        validated["display_name"] = None
-
-    if "dob" in data and data["dob"]:
-        validator.validate_date(data["dob"], "dob")
-        validated["dob"] = data["dob"]
-    else:
-        validated["dob"] = None
-
     return validated
 
 
@@ -651,7 +638,7 @@ def validate_household_subject_data(data: Dict[str, Any], is_create: bool = Fals
     validated = {}
 
     if "type" in data:
-        valid_types = ["child", "adult", "pet"]
+        valid_types = ["self","child", "adult", "pet"]
         validated["type"] = validator.validate_enum(data["type"], "type", valid_types)
     elif is_create:
         raise MissingRequiredFieldError("type")

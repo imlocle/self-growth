@@ -10,7 +10,6 @@ from models.errors import AuthenticationError
 from services.auth_service import AuthService
 from services.user_profile_service import UserProfileService
 from utils.request_context import RequestContext
-from utils.helper import generate_id
 
 
 class UserProfileController(BaseController):
@@ -29,20 +28,10 @@ class UserProfileController(BaseController):
 
     def create(self) -> UserProfile:
         """Create a user profile."""
-        household_id = self.require_household_id()
         auth_user = self.request_context.require_auth()
-
-        email = self.body.get("email") or auth_user.email
-        if not email:
-            access_token = self._extract_access_token()
-            full_user = self.auth_service.get_user_from_cognito(access_token)
-            email = full_user.email
-            if not email:
-                raise AuthenticationError("Email not found in Cognito user attributes")
 
         data = UserProfile.from_dict(
             {
-                "email": email,
                 "username": self.body.get("username"),
                 "first_name": self.body.get("first_name") or auth_user.first_name,
                 "last_name": self.body.get("last_name") or auth_user.last_name,
@@ -52,8 +41,6 @@ class UserProfileController(BaseController):
 
         return self.user_profile_service.create(
             user_id=auth_user.user_id,
-            household_id=household_id,
-            subject_id=generate_id(),
             data=data,
         )
 

@@ -13,8 +13,6 @@ class HouseholdMember(BaseModel):
     date_modified: str
 
     entity: str = "Member"
-    display_name: str | None = None
-    dob: str | None = None
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> Dict[str, Any]:
@@ -37,8 +35,6 @@ class HouseholdMember(BaseModel):
             "household_id": household_id,
             "user_id": user_id,
             "role": role,
-            "display_name": data.get("display_name"),
-            "dob": data.get("dob"),
         }
     @classmethod
     def from_dynamo(cls, item: Dict[str, Any]) -> "HouseholdMember":
@@ -47,8 +43,6 @@ class HouseholdMember(BaseModel):
             user_id=item["user_id"],
             role=item["role"],
             entity=item.get("entity", "Member"),
-            display_name=item.get("display_name"),
-            dob=item.get("dob"),
             date_created=item["date_created"],
             date_modified=item["date_modified"],
         )
@@ -59,8 +53,6 @@ class HouseholdMember(BaseModel):
             "user_id": self.user_id,
             "role": self.role,
             "entity": self.entity,
-            "display_name": self.display_name,
-            "dob": self.dob,
             "date_created": self.date_created,
             "date_modified": self.date_modified,
         }

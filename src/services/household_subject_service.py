@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from models.errors import NotFoundError
 from models.household_subject import HouseholdSubject
@@ -10,20 +10,21 @@ from utils.helper import utc_now_iso
 class HouseholdSubjectService:
     def __init__(
         self,
-        subject_repository: HouseholdSubjectRepository = None,
-        access_service: AccessService = None,
+        subject_repository: Optional[HouseholdSubjectRepository] = None,
+        access_service: Optional[AccessService] = None,
     ):
         self.subject_repo = subject_repository or HouseholdSubjectRepository()
         self.access = access_service or AccessService()
 
     def create(
-        self, user_id: str, household_id: str, subject_id: str, data: Dict[str, Any]
+        self, created_by_user_id: str, household_id: str, subject_id: str, data: Dict[str, Any]
     ) -> HouseholdSubject:
-        self.access.assert_household_member(user_id=user_id, household_id=household_id)
+        self.access.assert_household_member(user_id=created_by_user_id, household_id=household_id)
         timestamp = utc_now_iso()
         subject = HouseholdSubject(
             id=subject_id,
             household_id=household_id,
+            created_by_user_id=created_by_user_id,
             date_created=timestamp,
             date_modified=timestamp,
             **data,

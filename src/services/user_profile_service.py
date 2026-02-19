@@ -10,7 +10,7 @@ class UserProfileService:
         self.user_profile_repo = user_profile_repo or UserProfileRepository()
 
     def create(
-        self, user_id: str, household_id: str, subject_id: str, data: dict
+        self, user_id: str, data: dict
     ) -> UserProfile:
         existing = self.user_profile_repo.get(user_id=user_id)
         if existing:
@@ -19,8 +19,6 @@ class UserProfileService:
         now = utc_now_iso()
         user_profile = UserProfile(
             id=user_id,
-            household_id=household_id,
-            subject_id=subject_id,
             date_created=now,
             date_modified=now,
             **data

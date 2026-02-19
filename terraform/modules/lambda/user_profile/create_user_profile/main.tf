@@ -136,7 +136,7 @@ resource "aws_apigatewayv2_integration" "this" {
 }
 resource "aws_apigatewayv2_route" "this" {
   api_id    = var.api_id
-  route_key = "PUT /userProfile"
+  route_key = "POST /user-profile"
   target    = "integrations/${aws_apigatewayv2_integration.this.id}"
 
   authorization_type = "JWT"

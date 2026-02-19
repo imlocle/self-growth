@@ -15,11 +15,11 @@ def get_headers() -> dict[str, str]:
 
 
 def success_response(body: dict, status_code: int = 200):
-    body = dict_keys_to_camel_case(body)
+    camel_case_body = dict_keys_to_camel_case(body)
     return {
         "statusCode": status_code,
         "headers": get_headers(),
-        "body": json.dumps(body),
+        "body": json.dumps(camel_case_body),
     }
 
 
