@@ -2,7 +2,7 @@
 
 **Version**: 1.0  
 **Status**: Production Ready  
-**Last Updated**: February 16, 2026
+**Last Updated**: March 12, 2026
 
 A production-ready serverless backend for personal development tracking, supporting habits, todos, blog posts, and multi-user households with comprehensive analytics.
 
@@ -18,7 +18,7 @@ A production-ready serverless backend for personal development tracking, support
 - ✅ **Pagination & Filtering**: Efficient data retrieval
 - ✅ **Input Sanitization**: XSS and injection attack prevention
 - ✅ **Rate Limiting**: API throttling with monitoring
-- ✅ **Comprehensive Documentation**: API reference, integration guides
+- ✅ **Comprehensive Documentation**: Architecture, API, development, deployment guides
 
 ## 🏗️ Architecture
 
@@ -37,28 +37,27 @@ A production-ready serverless backend for personal development tracking, support
 API Gateway → Lambda Handler → Controller → Service → Repository → DynamoDB
 ```
 
-See [Architecture Overview](docs/architecture-overview.md) for details.
+For detailed architecture, see [Architecture Documentation](docs/ARCHITECTURE.md).
 
 ## 📚 Documentation
 
-### For Developers
+**Start here:** [Documentation Index](docs/INDEX.md) — Complete navigation guide
 
-- **[Source of Truth](docs/source-of-truth.md)** - Current state reference
-- **[Project Context](docs/project-context.md)** - Design principles and mental model
-- **[Architecture Overview](docs/architecture-overview.md)** - System architecture
-- **[API Reference](docs/api-reference.md)** - Complete endpoint documentation
+### Public Documentation (in `/docs`)
 
-### For Frontend Integration
+- **[README](docs/README.md)** — Project overview and quick start
+- **[ARCHITECTURE](docs/ARCHITECTURE.md)** — System design and technical details
+- **[DEVELOPMENT](docs/DEVELOPMENT.md)** — Developer guide and setup
+- **[BUGS](docs/BUGS.md)** — Known issues and troubleshooting
+- **[ROADMAP](docs/ROADMAP.md)** — Future features and vision
 
-- **[Frontend Integration Guide](docs/project-context.md#9-for-frontend-developers)** - Quick start for mobile/web apps
-- **[API Reference](docs/api-reference.md)** - All endpoints with examples
-- **[Input Sanitization](docs/input-sanitization.md)** - Security measures
+### Internal Documentation (in `/docs-internal`)
 
-### For Operations
-
-- **[Deployment Troubleshooting](docs/deployment-troubleshooting.md)** - Common issues
-- **[Rate Limiting](docs/rate-limiting.md)** - Configuration and monitoring
-- **[Infrastructure](docs/infrastructure-and-deployment.md)** - Terraform setup
+- **[CODEBASE_STRUCTURE](docs-internal/CODEBASE_STRUCTURE.md)** — Deep codebase walkthrough
+- **[DEPLOYMENT](docs-internal/DEPLOYMENT.md)** — Deployment procedures
+- **[MAINTENANCE](docs-internal/MAINTENANCE.md)** — Operations and monitoring
+- **[TESTING](docs-internal/TESTING.md)** — Testing strategies
+- **[TROUBLESHOOTING](docs-internal/TROUBLESHOOTING.md)** — Debug guide
 
 ## 🚀 Quick Start
 
@@ -70,35 +69,33 @@ See [Architecture Overview](docs/architecture-overview.md) for details.
 - **Python** 3.13
 - **Make**
 
-### 1. AWS Credentials
+### Installation
 
-Configure AWS credentials before deploying:
+For complete setup instructions, see [DEVELOPMENT.md](docs/DEVELOPMENT.md#local-development-setup).
 
-**Option 1: AWS CLI (Recommended)**
+**Quick Steps:**
 
 ```bash
+# 1. Configure AWS credentials
 aws configure
-# Enter: Access Key ID, Secret Access Key, region (e.g., us-west-1)
 
-# Verify
-aws sts get-caller-identity
+# 2. Install dependencies
+make install-dev
+
+# 3. Build Lambda layer
+docker build -t lambda-layer .
+docker run --rm -v $PWD/lambda_layer:/layer lambda-layer:latest
+
+# 4. Deploy to AWS
+cd terraform
+terraform init
+terraform apply
+
+# 5. Run tests
+make test
 ```
 
-**Option 2: Environment Variables**
-
-```bash
-export AWS_ACCESS_KEY_ID="your-access-key"
-export AWS_SECRET_ACCESS_KEY="your-secret-key"
-export AWS_REGION="us-west-1"
-```
-
-**Option 3: AWS Profile**
-
-```bash
-export AWS_PROFILE=default
-export AWS_REGION="us-west-1"
-export AWS_EC2_METADATA_DISABLED=true
-```
+````
 
 ### 2. Python Environment
 
@@ -106,7 +103,7 @@ export AWS_EC2_METADATA_DISABLED=true
 python -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install -r src/requirements.txt
-```
+````
 
 ### 3. Docker
 
